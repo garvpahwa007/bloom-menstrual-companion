@@ -149,6 +149,20 @@ test('React UI: demo onboarding shows fictional history, irregularity and an est
   assert.ok(Object.keys(envelope().data.logs).length > 30);
 });
 
+test('React UI: Privacy & Data explains local storage and exposes backup controls from navigation and Settings', async () => {
+  await startDemo();
+  await navigate('/privacy');
+  assert.ok(bodyText().includes(text('privacyData.title')));
+  assert.ok(bodyText().includes(text('privacyData.storageBody')));
+  assert.ok(bodyText().includes(text('privacyData.pinOff')));
+  assert.ok(findButton(text('settings.exportJSON')));
+  assert.ok(findButton(text('settings.exportCSV')));
+  assert.ok(findControl(text('settings.import')));
+  await navigate('/settings');
+  await clickButton(text('privacyData.open'));
+  await waitFor(() => window.location.pathname === '/privacy', 'Settings should link to the Privacy & Data screen.');
+});
+
 test('React UI: PIN form encrypts, lock survives reload, wrong PIN preserves data and correct PIN restores it', async () => {
   await startDemo(); await navigate('/settings');
   const original = envelope().data;
@@ -174,17 +188,20 @@ test('React UI: PIN form encrypts, lock survives reload, wrong PIN preserves dat
   await inputValue(findControl(text('settings.enterPin')), '4826');
   await clickButton(text('lock.unlock'));
   await waitFor(() => !!document.querySelector('.app-shell'), 'The correct PIN should restore the diary.');
-  await navigate('/settings');
+  await navigate('/privacy');
+  assert.ok(bodyText().includes(text('privacyData.pinOn')), 'The Privacy & Data screen should reflect the unlocked encrypted vault.');
   const restored = await captureExport('json');
   assert.deepEqual(JSON.parse(restored.content), original);
 });
 
 test('React UI: actual JSON and CSV downloads can each be imported with confirmation and restore identical data', async () => {
-  await startDemo(); await navigate('/settings');
+  await startDemo(); await navigate('/privacy');
   const initial = await captureExport('json');
   const initialState = JSON.parse(initial.content);
+  await navigate('/settings');
   await click(findControl(text('settings.discreet')));
   await waitFor(() => document.title === text('app.diary'), 'The diary should visibly change before import.');
+  await navigate('/privacy');
   const beforeConfirmation = localStorage.getItem('saheli.v1');
   await importBackup(initial);
   assert.equal(document.querySelectorAll('[role="alertdialog"]').length, 1);
@@ -193,8 +210,10 @@ test('React UI: actual JSON and CSV downloads can each be imported with confirma
   await waitFor(() => envelope()?.data?.settings.discreet === false, 'JSON import should restore the original settings.');
   assert.deepEqual(JSON.parse((await captureExport('json')).content), initialState);
   const csv = await captureExport('csv');
+  await navigate('/settings');
   await click(findControl(text('settings.contrast')));
   await waitFor(() => document.documentElement.dataset.contrast === 'high', 'The second test change should save.');
+  await navigate('/privacy');
   await importBackup(csv);
   await clickButton(text('common.continue'));
   await waitFor(() => document.documentElement.dataset.contrast === 'normal', 'CSV import should restore the settings.');
@@ -202,7 +221,7 @@ test('React UI: actual JSON and CSV downloads can each be imported with confirma
 });
 
 test('React UI: Delete everything uses one confirmation and clears both browser stores', async () => {
-  await startDemo(); await navigate('/settings');
+  await startDemo(); await navigate('/privacy');
   sessionStorage.setItem('synthetic-private-cache', 'fictional');
   await clickButton(text('settings.delete'));
   assert.equal(document.querySelectorAll('[role="alertdialog"]').length, 1);

@@ -111,6 +111,7 @@ const screens = [
   { name: 'Pregnancy confirmation setup', path: '/pregnancy', selector: '.pregnancy-setup' },
   { name: 'Confirmed pregnancy education', path: '/pregnancy', selector: '.pregnancy-hero', pregnancy: true },
   { name: 'Settings', path: '/settings', selector: '.settings-grid' },
+  { name: 'Privacy & Data', path: '/privacy', selector: '.privacy-data-screen' },
   { name: 'PIN setup form', path: '/settings', selector: '.pin-form', pin: true },
 ];
 

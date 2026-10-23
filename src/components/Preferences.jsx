@@ -11,7 +11,7 @@ export function Toggle({ checked, onChange, label, description }) {
   return <label className="toggle-row"><span><strong>{label}</strong>{description && <small className="muted">{description}</small>}</span><input className="toggle-input" type="checkbox" checked={!!checked} onChange={event => onChange(event.target.checked)} /><span className="toggle-track" aria-hidden="true"><span /></span></label>;
 }
 
-export function SettingsScreen({ state, t, vaultEnabled, onUpdateState, onEnablePIN, onDisablePIN, onLock, onExport, onImport, onDelete }) {
+export function SettingsScreen({ state, t, vaultEnabled, onUpdateState, onEnablePIN, onDisablePIN, onLock, onExport, onImport, onDelete, onNavigate }) {
   const [showPIN, setShowPIN] = useState(false); const [pin, setPin] = useState(''); const [repeat, setRepeat] = useState(''); const [error, setError] = useState(''); const [busy, setBusy] = useState(false);
   const setting = (key, value) => onUpdateState(s => ({ ...s, settings: { ...s.settings, [key]: value } }));
   const profile = (key, value) => onUpdateState(s => ({ ...s, profile: { ...s.profile, [key]: value } }));
@@ -20,7 +20,34 @@ export function SettingsScreen({ state, t, vaultEnabled, onUpdateState, onEnable
       <section className="card"><h2>{t('settings.profile')}</h2><label className="field"><span>{t('settings.age')}</span><select className="input" value={state.profile.ageGroup} onChange={e => profile('ageGroup', e.target.value)}><option value="under18">{t('welcome.under18')}</option><option value="adult">{t('welcome.adult')}</option></select></label><Toggle checked={state.profile.fertilityEnabled} onChange={v => profile('fertilityEnabled', v)} label={t('settings.fertility')} /><Toggle checked={state.profile.pregnancyFeatureEnabled || state.profile.pregnancyEnabled} onChange={v => profile('pregnancyFeatureEnabled', v)} label={t('settings.pregnancy')} /></section>
       <section className="card"><h2>{t('settings.symptoms')}</h2><p className="muted">{t('settings.symptomsNote')}</p><div className="settings-symptoms">{SYMPTOMS.map(symptom => <label key={symptom.id} className="check-chip"><input type="checkbox" checked={state.settings.trackedSymptoms.includes(symptom.id)} onChange={e => setting('trackedSymptoms', e.target.checked ? [...state.settings.trackedSymptoms, symptom.id] : state.settings.trackedSymptoms.filter(id => id !== symptom.id))} /><span>{t(`tracking.symptom.${symptom.id}`)}</span></label>)}</div></section></div>
       <div className="stack"><section className="card"><div className="section-heading"><h2>{t('settings.privacy')}</h2><ShieldCheck size={23} /></div><Toggle checked={state.settings.discreet} onChange={v => setting('discreet', v)} label={t('settings.discreet')} description={t('settings.discreetNote')} /><div className="pin-section"><h3><LockKeyhole size={18} />{t('settings.pin')}</h3><p className="muted">{t('settings.pinNote')}</p>{vaultEnabled ? <><p className="success-text"><Check size={16} />{t('settings.pinEnabled')}</p><div className="button-row"><button className="button secondary" onClick={onLock}>{t('header.lock')}</button><button className="text-link" onClick={onDisablePIN}>{t('settings.disablePin')}</button></div></> : <><p className="notice compact">{t('settings.pinWarning')}</p><button className="text-link export-first" onClick={() => onExport('json')}><Download size={16} />{t('settings.exportJSON')}</button>{showPIN ? <form className="stack pin-form" onSubmit={enable}><label className="field"><span>{t('settings.enterPin')}</span><input className="input" type="password" inputMode="numeric" pattern={`[0-9]{${CONFIG.pinLength}}`} maxLength={CONFIG.pinLength} required autoComplete="new-password" value={pin} onChange={e => setPin(e.target.value.replace(/\D/g, ''))} /></label><label className="field"><span>{t('settings.confirmPin')}</span><input className="input" type="password" inputMode="numeric" pattern={`[0-9]{${CONFIG.pinLength}}`} maxLength={CONFIG.pinLength} required autoComplete="new-password" value={repeat} onChange={e => setRepeat(e.target.value.replace(/\D/g, ''))} /></label>{error && <p role="alert">{error}</p>}<div className="button-row"><button className="button primary" type="submit" disabled={busy}>{t(busy ? 'common.loading' : 'settings.enablePin')}</button><button className="button secondary" type="button" onClick={() => { setShowPIN(false); setPin(''); setRepeat(''); }}>{t('common.cancel')}</button></div></form> : <button className="button secondary" onClick={() => setShowPIN(true)}><LockKeyhole size={18} />{t('settings.enablePin')}</button>}</>}</div></section>
-      <section className="card"><h2>{t('settings.data')}</h2><p className="muted text-small">{t('settings.exportNote')}</p><div className="data-actions"><button className="button secondary" onClick={() => onExport('json')}><Download size={17} />{t('settings.exportJSON')}</button><button className="button secondary" onClick={() => onExport('csv')}><Download size={17} />{t('settings.exportCSV')}</button><label className="button secondary import-button"><Upload size={17} />{t('settings.import')}<input type="file" accept=".json,.csv,application/json,text/csv" aria-label={t('settings.import')} onChange={async e => { const file = e.target.files?.[0]; if (file) await onImport(file); e.target.value = ''; }} /></label></div><div className="delete-section"><p className="muted text-small">{t('settings.deleteNote')}</p><button className="button danger" onClick={onDelete}><Trash2 size={17} />{t('settings.delete')}</button></div></section><div className="card soft-card"><Heart size={24} /><h3>{t('settings.about')}</h3><p className="muted">{t('settings.aboutBody')}</p></div></div></div></div>;
+      <section className="card"><h2>{t('privacyData.title')}</h2><p className="muted">{t('privacyData.settingsIntro')}</p><button className="button secondary" onClick={() => onNavigate('/privacy')}><ShieldCheck size={17} />{t('privacyData.open')}</button></section><div className="card soft-card"><Heart size={24} /><h3>{t('settings.about')}</h3><p className="muted">{t('settings.aboutBody')}</p></div></div></div></div>;
+}
+
+export function PrivacyDataScreen({ t, vaultEnabled, onNavigate, onExport, onImport, onDelete }) {
+  return <div className="stack privacy-data-screen">
+    <div className="page-heading"><div><p className="eyebrow">{t('privacyData.kicker')}</p><h1>{t('privacyData.title')}</h1><p className="muted">{t('privacyData.subtitle')}</p></div></div>
+    <section className="card">
+      <div className="section-heading"><h2>{t('privacyData.storageTitle')}</h2><ShieldCheck size={23} aria-hidden="true" /></div>
+      <p className="muted">{t('privacyData.storageBody')}</p>
+      <div className="notice privacy-data-status"><LockKeyhole size={20} aria-hidden="true" /><p><strong>{t(vaultEnabled ? 'privacyData.pinOn' : 'privacyData.pinOff')}</strong><br />{t(vaultEnabled ? 'privacyData.pinOnBody' : 'privacyData.pinOffBody')}</p></div>
+      <button className="text-link" onClick={() => onNavigate('/settings')}>{t('privacyData.managePin')}</button>
+    </section>
+    <section className="card">
+      <h2>{t('privacyData.backupTitle')}</h2>
+      <p className="muted">{t('privacyData.backupBody')}</p>
+      <div className="data-actions">
+        <button className="button secondary" onClick={() => onExport('json')}><Download size={17} />{t('settings.exportJSON')}</button>
+        <button className="button secondary" onClick={() => onExport('csv')}><Download size={17} />{t('settings.exportCSV')}</button>
+        <label className="button secondary import-button"><Upload size={17} />{t('settings.import')}<input type="file" accept=".json,.csv,application/json,text/csv" aria-label={t('settings.import')} onChange={async event => { const file = event.target.files?.[0]; if (file) await onImport(file); event.target.value = ''; }} /></label>
+      </div>
+      <p className="muted text-small privacy-data-restore-help">{t('privacyData.restoreHelp')}</p>
+    </section>
+    <section className="card">
+      <h2>{t('privacyData.deleteTitle')}</h2>
+      <p className="muted text-small">{t('privacyData.deleteBody')}</p>
+      <button className="button danger" onClick={onDelete}><Trash2 size={17} />{t('settings.delete')}</button>
+    </section>
+  </div>;
 }
 
 const defaultReminders = DEFAULT_REMINDERS;

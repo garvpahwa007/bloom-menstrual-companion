@@ -6,7 +6,7 @@ The working prototype is designed for a student such as Ananya, 17, who prefers 
 
 ## Project flow and status
 
-Fresh verification on 23 October 2026: after the lockfile repair, `npm ci` succeeds; **170/170 automated tests pass** and `npm run build` succeeds. Coverage includes diary-window patterns, optional symptom intensity, cautious fertility estimates and recurrence schedules. See [VALIDATION.md](VALIDATION.md) for evidence and limits.
+Fresh verification on 23 October 2026: after the lockfile repair, `npm ci` succeeds; **173/173 automated tests pass** and `npm run build` succeeds. Coverage includes diary-window patterns, optional symptom intensity, cautious fertility estimates and recurrence schedules. See [VALIDATION.md](VALIDATION.md) for evidence and limits.
 
 
 Follow the step-by-step checklist in [PROJECT_PROGRESS.md](PROJECT_PROGRESS.md). That file records implementation and actual validation results; this README does not imply that an unrecorded browser check or deployment has passed.
@@ -19,7 +19,8 @@ The user flow is:
 4. Review the calendar and insights for actual entries, cautious estimates, and repeated symptoms in diary-recorded timing windows.
 5. Open doctor guidance and prepare a visit summary when useful.
 6. Read a lesson or ask an offline question.
-7. Choose accessibility, reminders and privacy settings.
+7. Open Privacy & Data to review local storage, export a JSON backup or CSV, restore a validated backup, or delete the diary.
+8. Choose language, accessibility, PIN and reminder settings.
 
 ## Stack and running locally
 
@@ -63,7 +64,8 @@ The Vite preview server uses port 5173 by default. Stop the development server f
 | Ask | A local question matcher with 41 English/Hindi answers and a clear unknown-answer fallback. |
 | Reminders | Optional check-ins and period estimates; custom/medicine reminders can repeat once, daily or on selected weekdays; dated check-up reminder. |
 | Pregnancy | Confirmation-gated mode, estimated weeks/due date, 42 individual sourced week cards, warning signs and a check-up reminder flow. |
-| Settings | Language, text size, contrast, age group, tracked symptoms, discreet mode and data controls. |
+| Privacy & Data | Local-storage and PIN status, JSON backup download, CSV export, validated JSON/CSV restore and confirmed deletion. |
+| Settings | Language, text size, contrast, age group, tracked symptoms, discreet mode and PIN controls. |
 
 ## Estimates and uncertainty
 
@@ -110,7 +112,7 @@ The visit overview aggregates the complete logged history instead of selecting o
 - Logs, settings and offline questions are handled in the browser. Static hosting serves the application files; there is no health-data API, server-side diary storage or account system.
 - There are no third-party fonts, images, analytics or AI requests. Hosting still receives normal page/asset requests, and the host may retain access logs. External medical-source links make a request only when the user opens them.
 - The optional four-digit PIN derives an AES-256-GCM key through PBKDF2-SHA-256, with a random salt and a fresh IV for each saved encryption. The PIN itself is not stored. A forgotten PIN cannot be recovered. Four digits provide limited resistance to offline guessing; this is not a hardened shared-device security product.
-- JSON and CSV exports contain **unencrypted** personal data. Store them privately. Import restores the exported application data; a file does not restore a forgotten encryption PIN.
+- JSON and CSV exports contain **unencrypted** personal data, including private notes. Store them privately. The Privacy & Data screen offers JSON backup, CSV export and confirmed restore. Import restores the exported application data; a file does not restore a forgotten encryption PIN. There is no automatic cloud backup, and browser storage may be cleared.
 - “Delete everything” clears application storage for this origin after confirmation. It does not delete downloaded exports, printouts, browser backups or another browser’s data.
 - Discreet mode changes the visible name to “Diary”, uses a neutral icon and neutral reminder wording. It cannot hide browser history or an already shared screenshot.
 - Listen uses available local browser speech voices. A suitable local voice may be unavailable, particularly for Hindi; the app should not use a remote voice as a silent fallback.
@@ -152,6 +154,6 @@ Pregnancy education has 42 separately authored weekly cards. Weeks 4–41 use th
 
 Real AI, moderated community and Tamil remain intentionally optional extensions from the original brief. Independent clinician verification, robust background reminders and a full installable offline/PWA experience are outside this version. Future network features would need separate consent and a changed privacy description. Before public health use, seek clinical review, native-language review, accessibility testing and a security assessment. The prototype does not claim clinical or full accessibility certification.
 
-The Vercel production deployment is live at [Saheli](https://saheli-menstrual-companion.vercel.app/). The homepage and a direct `/calendar` page load were verified; see [VALIDATION.md](VALIDATION.md) for evidence and limits. This project is not linked to a Git repository, so automatic deploy-on-push is not configured. The GitHub instructions above describe the standard repeatable deployment route.
+The Vercel production deployment is live at [Saheli](https://saheli-menstrual-companion.vercel.app/). The homepage and direct `/calendar` and `/privacy` routes were verified; see [VALIDATION.md](VALIDATION.md) for evidence and limits. The Vercel project is connected to the private GitHub repository `garvpahwa007/saheli-menstrual-companion`; pushes to `main` trigger production builds.
 
 See [DEMO.md](DEMO.md) for a three-minute judge walkthrough and rehearsal checks.
