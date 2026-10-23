@@ -28,6 +28,7 @@ html[data-size=large]{font-size:18px}html[data-size=largest]{font-size:20px}html
   .input, .select { border-color: #9b87a6; }
   .button.secondary { border-color: #9b87a6; }
   .text-link, .sources a { text-decoration-thickness: 1px; text-underline-offset: 4px; }
+  .sources a { text-decoration-line: underline; }
   .text-link:hover, .sources a:hover { text-decoration: underline; }
   .lesson-diagram {
     border: 1px solid #b9a4c6;
