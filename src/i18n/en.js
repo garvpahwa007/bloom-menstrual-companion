@@ -239,7 +239,7 @@ export default {
   "privacyData.pinOffBody": "Diary data stored by this browser is not encrypted. You can turn on a PIN in Settings.",
   "privacyData.managePin": "Manage PIN in Settings",
   "privacyData.backupTitle": "Back up or restore",
-  "privacyData.backupBody": "JSON backup includes your diary, preferences and notes. It is a readable, unencrypted file. Keep it somewhere private. Saheli does not upload it automatically.",
+  "privacyData.backupBody": "JSON backups and CSV exports can include sensitive diary details and notes. Both are readable, unencrypted files. Keep them somewhere private. Saheli does not upload them automatically.",
   "privacyData.restoreHelp": "Restoring a JSON or CSV backup replaces your current diary only after you confirm.",
   "privacyData.deleteTitle": "Delete data from this device",
   "privacyData.deleteBody": "Permanently clear Saheli’s saved data in this browser. This cannot be undone.",

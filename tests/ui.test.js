@@ -154,6 +154,7 @@ test('React UI: Privacy & Data explains local storage and exposes backup control
   await navigate('/privacy');
   assert.ok(bodyText().includes(text('privacyData.title')));
   assert.ok(bodyText().includes(text('privacyData.storageBody')));
+  assert.ok(bodyText().includes(text('privacyData.backupBody')), 'The screen should warn about sensitive, unencrypted JSON and CSV exports.');
   assert.ok(bodyText().includes(text('privacyData.pinOff')));
   assert.ok(findButton(text('settings.exportJSON')));
   assert.ok(findButton(text('settings.exportCSV')));
