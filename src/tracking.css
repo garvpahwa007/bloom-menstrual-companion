@@ -1,0 +1,480 @@
+/* Local, responsive presentation for the cycle-tracking screens. */
+.tracking-today,
+.tracking-log-page,
+.tracking-calendar-page,
+.tracking-insights-page {
+  min-width: 0;
+  width: 100%;
+}
+
+.tracking-page-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1.5rem;
+  margin-bottom: .4rem;
+}
+.tracking-page-heading > div { min-width: 0; }
+.tracking-page-heading h1 { margin: .35rem 0 .6rem; letter-spacing: -.045em; }
+.tracking-page-heading p { margin: 0; }
+.tracking-page-heading .eyebrow { color: var(--plum); margin-bottom: .5rem; }
+.tracking-heading-log { flex: 0 0 auto; }
+.tracking-today h2,
+.tracking-calendar-page h2,
+.tracking-insights-page h2,
+.tracking-log-page h2 { letter-spacing: -.025em; }
+.tracking-today .section-heading h2,
+.tracking-calendar-page .section-heading h2,
+.tracking-insights-page .section-heading h2,
+.tracking-log-page .section-heading h2 { margin: .3rem 0; }
+.tracking-today button,
+.tracking-log-page button,
+.tracking-calendar-page button,
+.tracking-insights-page button { overflow-wrap: anywhere; }
+
+/* The first screen has one clear primary action and an estimate below it. */
+.tracking-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.45fr) minmax(180px, .75fr);
+  position: relative;
+  isolation: isolate;
+  gap: 1.4rem 1rem;
+  padding: 2.2rem 2.5rem 0;
+  overflow: hidden;
+  border-radius: 1.6rem;
+  color: #fff;
+  background: linear-gradient(112deg, #674574 0%, #755486 63%, #82618f 100%);
+  box-shadow: 0 10px 28px #50365d10;
+}
+.tracking-hero::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  right: -130px;
+  top: -210px;
+  width: 540px;
+  height: 540px;
+  border-radius: 50%;
+  border: 1px solid #ffffff12;
+}
+.tracking-hero-copy { min-width: 0; padding-bottom: .4rem; }
+.tracking-hero-label {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  font-size: .72rem;
+  font-weight: 650;
+  letter-spacing: .13em;
+  line-height: 1.6;
+  color: #fff;
+}
+.tracking-hero-dot { width: 6px; height: 6px; flex: 0 0 6px; border-radius: 50%; background: #f0c9bd; }
+.tracking-hero h2 {
+  margin: 1rem 0 .7rem;
+  font-size: clamp(2rem, 3.6vw, 3.1rem);
+  font-weight: 450;
+  line-height: 1.15;
+  letter-spacing: -.055em;
+  color: #fff;
+}
+.tracking-hero h2 strong { font-weight: 500; }
+.tracking-hero-copy > p { max-width: 430px; margin: 0; color: #fff; line-height: 1.65; font-size: 1rem; }
+.tracking-hero-button {
+  margin-top: 1.4rem;
+  background: #fff6f2;
+  color: #5c3c69;
+  border-color: #fff6f2;
+  box-shadow: 0 2px 0 #462b5012;
+}
+.tracking-hero-button:hover { background: #fff; color: #492755; }
+.tracking-cycle-orbit { position: relative; align-self: center; justify-self: center; display: grid; place-items: center; width: 218px; height: 218px; }
+.tracking-orbit-ring { position: absolute; border-radius: 50%; border: 1px solid #ffffff24; }
+.tracking-orbit-ring-one { inset: 0; }
+.tracking-orbit-ring-two { inset: 17px; border-style: dashed; border-color: #ffffff32; transform: rotate(-20deg); }
+.tracking-orbit-center { display: grid; place-items: center; align-content: center; gap: .3rem; height: 146px; width: 146px; border-radius: 50%; background: #ffffff0a; border: 1px solid #ffffff21; color: #ebc4c2; }
+.tracking-orbit-center span { color: #fff; font-size: 1rem; letter-spacing: .025em; }
+.tracking-orbit-small { position: absolute; top: 11px; right: 15px; width: 42px; height: 42px; display: grid; place-items: center; border-radius: 50%; border: 1px solid #ffffff38; background: #6f4d7d; color: #fff; transform: rotate(12deg); }
+.tracking-hero-estimate {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: .9rem;
+  padding: 1.1rem 0 1.2rem;
+  border-top: 1px solid #ffffff25;
+  color: #fff;
+}
+.tracking-hero-estimate > svg { flex: 0 0 auto; color: #ebc5c5; }
+.tracking-hero-estimate > div { display: flex; flex-wrap: wrap; align-items: baseline; gap: .45rem 1rem; min-width: 0; }
+.tracking-hero-estimate > div > span { color: #fff; font-size: 1rem; }
+.tracking-hero-estimate strong { font-size: 1.1rem; font-weight: 600; color: #fff; overflow-wrap: anywhere; }
+.tracking-hero-estimate .tracking-irregular-badge { margin-left: auto; padding: .4rem .65rem; font-size: 1rem; background: #60436e; color: #fff; border: 1px solid #ffffff22; white-space: normal; }
+
+.tracking-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.1rem; }
+.tracking-stat { position: relative; display: flex; flex-direction: column; align-items: flex-start; gap: .65rem; min-width: 0; min-height: 150px; padding: 1.35rem 1.4rem; }
+.tracking-stat > .muted { padding-right: 2.9rem; font-size: 1rem; }
+.tracking-stat > strong { font-size: clamp(1.2rem, 2vw, 1.7rem); letter-spacing: -.035em; line-height: 1.25; font-weight: 650; color: var(--ink); overflow-wrap: anywhere; }
+.tracking-stat > small { font-size: 1rem; line-height: 1.5; }
+.tracking-stat-icon { display: inline-grid; place-items: center; flex: 0 0 42px; width: 42px; height: 42px; border-radius: .9rem; color: var(--plum); }
+.tracking-stat > .tracking-stat-icon { position: absolute; top: 1.2rem; right: 1.2rem; }
+.tracking-stat-icon.lilac { background: #f1eaf7; color: #886799; }
+.tracking-stat-icon.peach { background: #f9ede8; color: #b8766f; }
+.tracking-stat-icon.sage { background: #eff3ed; color: #70846f; }
+
+.tracking-dashboard-grid { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 1.15rem; }
+.tracking-recent-card { min-width: 0; }
+.tracking-recent-card .section-heading { gap: .5rem; }
+.tracking-day-strip { display: grid; grid-template-columns: repeat(14, minmax(0, 1fr)); gap: .22rem; margin: 1.1rem 0 .3rem; }
+.tracking-strip-day { display: flex; min-width: 0; flex-direction: column; align-items: center; gap: .15rem; color: var(--muted); text-align: center; }
+.tracking-strip-day > span { font-size: 1rem; line-height: 1.5; }
+.tracking-strip-day > button { min-width: 0; width: 100%; max-width: 36px; min-height: 48px; padding: .35rem .1rem; border: 1px solid transparent; border-radius: 1rem; background: transparent; color: var(--ink); font: inherit; font-size: 1rem; cursor: pointer; }
+.tracking-strip-day > i { font-style: normal; font-size: 1rem; line-height: .8; color: #755486; }
+.tracking-strip-day.logged > button { background: #f6dedb; color: #8b514d; }
+.tracking-strip-day.today > button { border: 1.5px solid #9b7cac; color: var(--plum-dark); font-weight: 700; }
+.tracking-strip-day > button:hover { background: var(--lilac); }
+.tracking-legend { display: flex; flex-wrap: wrap; align-items: center; gap: .55rem 1.3rem; padding-top: .85rem; color: var(--muted); }
+.tracking-legend > span { display: inline-flex; align-items: center; gap: .45rem; font-size: 1rem; line-height: 1.5; }
+.tracking-legend .legend-dot { display: inline-block; width: 10px; height: 10px; flex: 0 0 10px; border-radius: 50%; }
+.tracking-legend .legend-dot.logged { background: #9f6259; }
+.tracking-legend .legend-dot.symptom { background: #9a80ad; width: 6px; height: 6px; flex-basis: 6px; margin-left: 2px; margin-right: 2px; }
+.tracking-legend .legend-dot.predicted { background: #fcfaff; border: 1.5px dashed #755486; border-radius: 2px; }
+.tracking-legend .legend-dot.cycle { background: #8c6e9c; }
+.tracking-insight-card { background: #f4f0f7; border-color: #eee6f2; }
+.tracking-insight-card > h2 { margin: .8rem 0 .6rem; font-size: 1.25rem; }
+.tracking-insight-card > p:not(.eyebrow) { font-size: 1rem; line-height: 1.7; color: #6e6175; }
+.tracking-insight-spark { display: inline-grid; place-items: center; color: #9778a6; margin-bottom: .5rem; }
+.tracking-insight-card .eyebrow { color: #755583; }
+.tracking-text-link { display: inline-flex; align-items: center; justify-content: flex-start; gap: .5rem; min-height: 48px; min-width: 0; max-width: 100%; padding: .4rem 0; border: 0; background: transparent; color: var(--plum-dark); font: inherit; font-size: 1rem; font-weight: 650; text-align: left; cursor: pointer; text-decoration: none; }
+.tracking-text-link > svg { flex: 0 0 auto; }
+.tracking-text-link:hover { color: #755486; }
+.tracking-quick-log .section-heading { align-items: start; gap: 1rem; }
+.tracking-quick-log .section-heading p { margin-top: .4rem; margin-bottom: 0; }
+.tracking-quick-log .section-heading .badge { flex: 0 0 auto; font-size: 1rem; }
+.tracking-quick-symptoms { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .7rem; margin-top: 1.3rem; }
+.tracking-symptom-button { display: flex; align-items: center; justify-content: flex-start; gap: .6rem; min-width: 0; min-height: 68px; padding: .7rem .8rem; border: 1px solid #eee7ef; border-radius: .9rem; background: #fff; color: var(--ink); font: inherit; font-size: 1rem; text-align: left; cursor: pointer; }
+.tracking-symptom-button > span { display: grid; flex: 0 0 34px; width: 34px; height: 36px; place-items: center; border-radius: .7rem; background: #f6f0f8; color: #9a7ca9; }
+.tracking-symptom-button > svg:last-child { flex: 0 0 auto; margin-left: auto; color: #a993b4; }
+.tracking-symptom-button:hover { background: #fdf9ff; border-color: #c9b6d5; }
+.tracking-learn-banner { display: flex; align-items: center; gap: 1.2rem; width: 100%; min-width: 0; padding: 1.4rem 1.5rem; border: 1px solid #eaeadd; border-radius: 1.25rem; background: #f4f4ec; color: var(--ink); font: inherit; text-align: left; cursor: pointer; }
+.tracking-learn-banner > span:nth-child(2) { min-width: 0; flex: 1; display: flex; flex-direction: column; gap: .35rem; }
+.tracking-learn-banner .eyebrow { font-size: .65rem; color: #5d6d52; }
+.tracking-learn-banner strong { font-weight: 650; font-size: 1.1rem; letter-spacing: -.025em; }
+.tracking-learn-banner .muted { font-size: 1rem; color: #63685a; }
+.tracking-learn-banner > svg { flex: 0 0 auto; color: #849073; }
+.tracking-learn-art { display: grid; place-items: center; width: 61px; height: 61px; flex: 0 0 61px; border: 1px solid #e2e7d9; border-radius: 50%; background: #e9eddf; color: #8a9a79; }
+.tracking-privacy { display: flex; align-items: flex-start; justify-content: center; gap: .45rem; margin: .2rem 0 0; font-size: 1rem; line-height: 1.6; text-align: center; }
+.tracking-privacy > svg { flex: 0 0 auto; margin-top: .13rem; }
+
+/* Daily logging controls remain large and labelled at every breakpoint. */
+.tracking-log-date { display: flex; align-items: flex-end; flex-wrap: wrap; gap: 1rem 1.5rem; }
+.tracking-log-date > .field { width: 260px; max-width: 100%; }
+.tracking-log-date > .muted { padding-bottom: .8rem; }
+.tracking-log-page h3 { margin: 0 0 .8rem; font-size: 1rem; font-weight: 650; }
+.tracking-log-page .field { min-width: 0; }
+.tracking-log-page .field > span > svg { display: inline; vertical-align: -.2em; }
+.tracking-log-page .input { box-sizing: border-box; min-width: 0; max-width: 100%; }
+.tracking-log-page .section-heading > svg { color: #b18dba; }
+.tracking-form-section { margin-top: 1.4rem; }
+.tracking-choice-row { display: grid; gap: .7rem; margin-top: .9rem; }
+.tracking-choice-row.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.tracking-choice-row.three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.tracking-choice-row.four { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.tracking-choice-row.five { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+.tracking-choice { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .6rem; width: 100%; min-width: 0; min-height: 92px; padding: 1rem .65rem; border: 1.5px solid #9b87a6; border-radius: 1rem; background: #fff; color: var(--muted); font: inherit; font-size: 1rem; line-height: 1.5; cursor: pointer; text-align: center; }
+.tracking-choice > svg { flex: 0 0 auto; color: #ae91b8; }
+.tracking-choice:hover { border-color: #80608f; background: #fdfaff; }
+.tracking-choice.selected { border-color: #755486; background: #f2ecf7; color: #624272; box-shadow: inset 0 0 0 .5px #9676a8; }
+.tracking-choice.selected > svg { color: #886298; }
+.tracking-choice .tracking-choice-check { position: absolute; top: .5rem; right: .5rem; color: #795889; }
+.tracking-choice.flow-heavy > svg { fill: #e4b8b3; color: #bb7a74; }
+.tracking-choice.flow-medium > svg { fill: #f0d6d2; color: #c68f87; }
+.tracking-choice.flow-light > svg { fill: #faebe6; color: #cfa99e; }
+.tracking-choice.flow-spotting > svg { color: #d0b9ad; }
+.tracking-soft-box { margin-top: 1.2rem; padding: 1.15rem; border-radius: 1rem; background: #f6f2f8; border: 1px solid #eee6f1; }
+.tracking-soft-box p { margin: .3rem 0; line-height: 1.65; }
+.tracking-soft-box .muted { font-size: 1rem; }
+.tracking-check-row { display: flex; align-items: flex-start; gap: .85rem; min-height: 48px; padding: .65rem 0; cursor: pointer; color: var(--ink); line-height: 1.6; font-size: 1rem; }
+.tracking-check-row input { width: 22px; height: 22px; flex: 0 0 22px; accent-color: var(--plum); margin: .17rem 0 0; }
+.tracking-check-row span { min-width: 0; overflow-wrap: anywhere; }
+.tracking-pain-number { font-size: 1.8rem; color: var(--plum); letter-spacing: -.04em; font-weight: 600; }
+.tracking-pain-number small { font-size: 1rem; margin-left: .2rem; color: var(--muted); }
+.tracking-pain-range { accent-color: #9473a4; width: 100%; min-height: 48px; margin: .6rem 0 0; padding: 0; cursor: pointer; }
+.tracking-range-labels { display: flex; justify-content: space-between; gap: 1rem; font-size: 1rem; }
+.tracking-symptom-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .7rem; margin-top: 1.1rem; }
+.tracking-symptom-choice { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .7rem; min-width: 0; min-height: 104px; padding: 1rem .65rem; border: 1.5px solid #9b87a6; border-radius: 1rem; background: #fff; color: var(--muted); font: inherit; font-size: 1rem; line-height: 1.5; cursor: pointer; }
+.tracking-symptom-choice > svg { color: #ab8ab6; flex: 0 0 auto; }
+.tracking-symptom-choice > svg:last-child:not(:first-child) { position: absolute; right: .5rem; top: .5rem; }
+.tracking-symptom-choice:hover { background: #fdfaff; border-color: #80608f; }
+.tracking-symptom-choice.selected { background: #f2ecf7; border-color: #755486; color: var(--plum-dark); box-shadow: inset 0 0 0 .5px #9676a8; }
+.tracking-symptom-choice.selected > svg { color: #886298; }
+.tracking-help-now { display: flex; gap: .85rem; align-items: flex-start; padding: 1.15rem; border: 1px solid #dfc3b0; border-radius: 1rem; background: #fcf4e9; color: #67503e; }
+.tracking-help-now > svg { margin-top: .15rem; flex: 0 0 auto; }
+.tracking-help-now p { margin: .6rem 0 0; line-height: 1.6; }
+.tracking-save-bar { position: sticky; bottom: 1rem; z-index: 3; display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 1rem 1.2rem; border-radius: 1.1rem; border: 1px solid #ece4ef; background: #fffefdf5; backdrop-filter: blur(12px); box-shadow: 0 5px 25px #40274d0d; }
+.tracking-save-bar > div { min-width: 0; }
+.tracking-save-bar .button { flex: 0 0 auto; }
+.tracking-save-message { display: flex; gap: .45rem; align-items: center; margin: 0; color: #64795e; font-size: 1rem; }
+.tracking-save-message > svg { flex: 0 0 auto; }
+
+/* Filled rounded cells and dashed square cells differ without relying on colour. */
+.tracking-calendar-card { min-width: 0; padding: 1.7rem; }
+.tracking-calendar-toolbar { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem; }
+.tracking-calendar-toolbar > h2 { min-width: 0; margin: 0; font-size: 1.35rem; overflow-wrap: anywhere; }
+.tracking-calendar-toolbar > div { display: flex; gap: .3rem; align-items: center; }
+.tracking-calendar-toolbar .button { padding-left: 1rem; padding-right: 1rem; }
+.tracking-calendar-grid { gap: .55rem; width: 100%; min-width: 0; }
+.tracking-calendar-weekday { min-width: 0; padding: .2rem 0 .8rem; text-align: center; font-size: 1rem; font-weight: 550; color: var(--muted); overflow-wrap: anywhere; }
+.tracking-calendar-day { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .2rem; width: 100%; min-width: 0; min-height: 76px; padding: .6rem .1rem; border: 1px solid #f0eaf2; border-radius: 1rem; color: var(--ink); background: #fff; font: inherit; cursor: pointer; }
+.tracking-calendar-day:hover { border-color: #b59ac7; background: #f6f1fa; }
+.tracking-calendar-number { display: grid; place-items: center; font-size: 1rem; line-height: 1.4; font-weight: 500; }
+.tracking-calendar-mark { display: flex; align-items: center; justify-content: center; min-height: 12px; font-size: 1rem; line-height: 1; color: #755486; }
+.tracking-calendar-day.has-log:not(.logged) { background: #fbf8fc; }
+.tracking-calendar-day.logged { border-color: #9c665d; background: #f6dfdc; border-radius: 1.7rem; }
+.tracking-calendar-day.logged .tracking-calendar-number { color: #8d5751; font-weight: 650; }
+.tracking-calendar-day.logged .tracking-calendar-mark { color: #8d5751; }
+.tracking-calendar-day.predicted { border: 1.5px dashed #80608f; border-radius: .45rem; background: #fbf8fe; }
+.tracking-calendar-day.predicted .tracking-calendar-number { color: #755486; }
+.tracking-calendar-day.is-today { outline: 2px solid #8a669d; outline-offset: 1px; }
+.tracking-calendar-day.is-today .tracking-calendar-number { font-weight: 750; }
+.tracking-calendar-card .tracking-legend { border-top: 1px solid var(--line); margin-top: 1.3rem; padding-top: 1.2rem; }
+.tracking-calendar-footnote { display: flex; align-items: flex-start; gap: .5rem; margin: 1rem 0 0; font-size: 1rem; line-height: 1.6; }
+.tracking-calendar-footnote > svg { flex: 0 0 auto; margin-top: .2rem; }
+.tracking-summary-row { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; padding: .85rem 0; border-bottom: 1px solid #f0ebf2; }
+.tracking-summary-row:last-child { border-bottom: 0; }
+.tracking-summary-row strong { color: var(--plum); font-size: 1.15rem; }
+
+/* Data charts have no horizontal overflow or remote chart dependencies. */
+.tracking-gap-card { display: flex; align-items: flex-start; gap: 1rem; background: #faf6ec; border-color: #eae0c8; }
+.tracking-gap-card > svg { color: #9a885e; flex: 0 0 auto; margin-top: .2rem; }
+.tracking-gap-card > div { min-width: 0; }
+.tracking-gap-card h2 { margin-top: 0; }
+.tracking-gap-card p { line-height: 1.7; }
+.tracking-gap-item { padding-top: .5rem; }
+.tracking-gap-item > strong { display: block; font-size: 1rem; overflow-wrap: anywhere; }
+.tracking-gap-actions { display: flex; flex-wrap: wrap; gap: .6rem; margin-top: .9rem; }
+.tracking-gap-actions .button { min-width: 0; max-width: 100%; }
+.tracking-chart { width: 100%; min-width: 0; margin-top: 1.6rem; }
+.tracking-chart-scale { display: flex; justify-content: space-between; gap: .5rem; padding-bottom: .5rem; font-size: 1rem; border-bottom: 1px solid var(--line); }
+.tracking-chart-row { min-width: 0; padding: 1rem 0 .7rem; }
+.tracking-chart-label { display: flex; justify-content: space-between; flex-wrap: wrap; gap: .2rem .75rem; margin-bottom: .5rem; font-size: 1rem; }
+.tracking-chart-label > span { color: var(--muted); }
+.tracking-chart-label > strong { font-size: 1rem; font-weight: 650; color: #7c5d8e; }
+.tracking-chart-track { position: relative; width: 100%; min-width: 0; height: 15px; overflow: hidden; border-radius: 8px; background: #f7f3f9; }
+.tracking-chart-cycle { position: absolute; left: 0; top: 0; height: 100%; max-width: 100%; border-radius: 8px; background: #8c6e9c; }
+.tracking-chart-period { position: absolute; left: 0; top: 0; height: 100%; max-width: 100%; border-radius: 8px; background: #9f6259; }
+.tracking-chart-period-label { display: block; margin-top: .35rem; font-size: 1rem; }
+.tracking-insights-page .card > .tracking-legend + p { font-size: 1rem; line-height: 1.7; margin-top: 1rem; }
+.tracking-pattern { display: flex; align-items: flex-start; gap: 1rem; padding: .9rem 0; }
+.tracking-pattern + .tracking-pattern { border-top: 1px solid var(--line); }
+.tracking-pattern > div { min-width: 0; }
+.tracking-pattern h3 { margin: .1rem 0 .5rem; font-size: 1rem; line-height: 1.6; font-weight: 600; }
+.tracking-pattern p { margin: 0; font-size: 1rem; line-height: 1.6; }
+.tracking-estimate-card > svg,
+.tracking-insight-card > svg,
+.tracking-fertility > svg { color: #a284af; }
+.tracking-estimate-card h2 { margin: .9rem 0; }
+.tracking-estimate-dates { display: block; font-size: 1.25rem; line-height: 1.5; color: #755487; letter-spacing: -.025em; overflow-wrap: anywhere; }
+.tracking-estimate-card p,
+.tracking-fertility p { line-height: 1.7; }
+.tracking-fertility .tracking-soft-box { color: #5f4b6b; font-weight: 550; }
+
+@media (max-width: 1100px) {
+  .tracking-dashboard-grid { grid-template-columns: minmax(0, 1fr); }
+  .tracking-hero { padding-left: 2rem; padding-right: 2rem; }
+  .tracking-cycle-orbit { width: 190px; height: 190px; }
+  .tracking-orbit-center { width: 130px; height: 130px; }
+  .tracking-quick-symptoms { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .tracking-stat { padding: 1.2rem; }
+}
+@media (max-width: 760px) {
+  .tracking-page-heading { align-items: flex-start; flex-wrap: wrap; gap: 1rem; }
+  .tracking-stats { gap: .7rem; }
+  .tracking-stat { min-height: 154px; padding: 1rem; gap: .55rem; }
+  .tracking-stat > .tracking-stat-icon { position: static; width: 34px; height: 34px; flex-basis: 34px; border-radius: .65rem; }
+  .tracking-stat > .tracking-stat-icon > svg { width: 18px; height: 18px; }
+  .tracking-stat > .muted { padding-right: 0; font-size: 1rem; }
+  .tracking-stat > strong { font-size: 1.25rem; }
+  .tracking-stat > small { font-size: 1rem; }
+  .tracking-hero { grid-template-columns: minmax(0, 1fr) 148px; padding: 1.6rem 1.6rem 0; gap: 1rem .4rem; }
+  .tracking-hero h2 { font-size: 2rem; }
+  .tracking-cycle-orbit { width: 148px; height: 148px; }
+  .tracking-orbit-ring-two { inset: 12px; }
+  .tracking-orbit-center { width: 104px; height: 104px; }
+  .tracking-orbit-center > svg { width: 48px; height: 48px; }
+  .tracking-orbit-center span { font-size: 1rem; }
+  .tracking-orbit-small { width: 30px; height: 30px; top: 3px; right: 6px; }
+  .tracking-orbit-small > svg { width: 16px; height: 16px; }
+  .tracking-hero-estimate { gap: .65rem; padding: 1rem 0 1.2rem; }
+  .tracking-hero-estimate > div { flex: 1; display: block; }
+  .tracking-hero-estimate > div > span { display: block; margin-bottom: .3rem; }
+  .tracking-hero-estimate .tracking-irregular-badge { margin-left: 0; }
+  .tracking-choice-row.five { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .tracking-symptom-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .tracking-calendar-card { padding: 1.25rem; }
+  .tracking-calendar-grid { gap: .35rem; }
+  .tracking-calendar-day { min-height: 68px; }
+  .tracking-calendar-toolbar { gap: .75rem; }
+  .tracking-calendar-toolbar h2 { font-size: 1.2rem; }
+  .tracking-save-bar { bottom: 5.5rem; }
+}
+@media (max-width: 520px) {
+  .tracking-page-heading h1 { font-size: 1.8rem; line-height: 1.25; }
+  .tracking-page-heading > .button { width: 100%; justify-content: center; }
+  .tracking-hero { grid-template-columns: minmax(0, 1fr); padding: 1.5rem 1.25rem 0; border-radius: 1.2rem; }
+  .tracking-hero h2 { font-size: 2.2rem; margin-top: .85rem; }
+  .tracking-hero h2 strong { font-size: 2.65rem; }
+  .tracking-cycle-orbit { display: none; }
+  .tracking-hero-button { width: 100%; justify-content: space-between; margin-top: 1.1rem; }
+  .tracking-hero-estimate { align-items: flex-start; }
+  .tracking-hero-estimate > svg { margin-top: .15rem; }
+  .tracking-hero-estimate > div > span { font-size: 1rem; }
+  .tracking-hero-estimate strong { font-size: 1.02rem; }
+  .tracking-hero-estimate .tracking-irregular-badge { margin-left: 1.95rem; }
+  .tracking-stats { grid-template-columns: minmax(0, 1fr); gap: .6rem; }
+  .tracking-stat { min-height: 0; padding: 1rem 1.15rem; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: .25rem .7rem; align-items: center; }
+  .tracking-stat > .tracking-stat-icon { grid-column: 2; grid-row: 1 / 4; }
+  .tracking-stat > .muted { grid-column: 1; font-size: 1rem; }
+  .tracking-stat > strong { grid-column: 1; font-size: 1.3rem; }
+  .tracking-stat > small { grid-column: 1; font-size: 1rem; }
+  .tracking-stat:not(:has(> .tracking-stat-icon)) { display: flex; flex-direction: column; align-items: flex-start; }
+  .tracking-day-strip { grid-template-columns: repeat(7, minmax(0, 1fr)); row-gap: .7rem; }
+  .tracking-strip-day > button { max-width: 38px; font-size: 1rem; }
+  .tracking-strip-day > span { font-size: 1rem; }
+  .tracking-quick-log .section-heading { flex-wrap: wrap; }
+  .tracking-quick-log .section-heading .badge { font-size: 1rem; }
+  .tracking-quick-symptoms { gap: .55rem; }
+  .tracking-symptom-button { flex-wrap: wrap; gap: .5rem; min-height: 105px; padding: .8rem; font-size: 1rem; }
+  .tracking-symptom-button > span { width: 32px; height: 32px; flex-basis: 32px; }
+  .tracking-symptom-button > svg:last-child { margin-left: auto; }
+  .tracking-learn-banner { padding: 1.1rem; gap: .8rem; align-items: flex-start; }
+  .tracking-learn-art { width: 42px; height: 42px; flex-basis: 42px; }
+  .tracking-learn-art > svg { width: 23px; height: 23px; }
+  .tracking-learn-banner .eyebrow { font-size: .6rem; }
+  .tracking-learn-banner strong { font-size: 1rem; line-height: 1.55; }
+  .tracking-learn-banner .muted { font-size: 1rem; line-height: 1.6; }
+  .tracking-learn-banner > svg { width: 18px; height: 18px; margin-top: .15rem; }
+  .tracking-privacy { font-size: 1rem; text-align: left; justify-content: flex-start; }
+  .tracking-choice-row.four,
+  .tracking-choice-row.five,
+  .tracking-symptom-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .55rem; }
+  .tracking-choice-row.three { gap: .45rem; }
+  .tracking-choice { min-height: 92px; padding: .8rem .5rem; font-size: 1rem; }
+  .tracking-symptom-choice { min-height: 105px; font-size: 1rem; padding: .9rem .55rem; }
+  .tracking-soft-box { padding: .9rem; }
+  .tracking-check-row { gap: .65rem; }
+  .tracking-log-date > .field { width: 100%; }
+  .tracking-log-date > .muted { font-size: 1rem; padding-bottom: 0; }
+  .tracking-help-now { padding: .9rem; gap: .6rem; }
+  .tracking-save-bar { padding: .85rem; flex-direction: column; align-items: stretch; gap: .5rem; }
+  .tracking-save-bar > div:empty { display: none; }
+  .tracking-save-bar .button { width: 100%; justify-content: center; }
+  .tracking-save-message { font-size: 1rem; justify-content: center; }
+  .tracking-calendar-card { padding: .85rem; }
+  .tracking-calendar-toolbar { margin-bottom: 1rem; }
+  .tracking-calendar-toolbar > h2 { width: 100%; font-size: 1.15rem; }
+  .tracking-calendar-toolbar > div { width: 100%; justify-content: space-between; }
+  .tracking-calendar-toolbar .button { flex: 1; max-width: 130px; }
+  .tracking-calendar-grid { gap: 3px; }
+  .tracking-calendar-weekday { font-size: 1rem; padding-bottom: .55rem; }
+  .tracking-calendar-day { min-height: 60px; padding: .5rem .05rem; border-radius: .6rem; }
+  .tracking-calendar-day.logged { border-radius: 1.2rem; }
+  .tracking-calendar-day.predicted { border-radius: .2rem; }
+  .tracking-calendar-number { font-size: 1rem; }
+  .tracking-calendar-card .tracking-legend { gap: .5rem .8rem; }
+  .tracking-legend > span { font-size: 1rem; }
+  .tracking-calendar-footnote { font-size: 1rem; }
+  .tracking-gap-card { flex-direction: column; gap: .6rem; }
+  .tracking-gap-actions { flex-direction: column; }
+  .tracking-gap-actions .button { width: 100%; }
+  .tracking-chart-label { font-size: 1rem; }
+  .tracking-pattern { gap: .75rem; }
+  .tracking-pattern .tracking-stat-icon { width: 34px; height: 34px; flex-basis: 34px; }
+  .tracking-pattern h3 { margin-top: 0; font-size: 1rem; }
+  .tracking-estimate-dates { font-size: 1.1rem; }
+}
+@media (prefers-contrast: more) {
+  .tracking-hero { background: #53375f; }
+  .tracking-hero-copy > p, .tracking-hero-label { color: #fff; }
+  .tracking-stat > small, .tracking-strip-day, .tracking-calendar-weekday { color: #514756; }
+  .tracking-calendar-day.predicted { border-color: #755486; }
+  .tracking-choice, .tracking-symptom-choice { color: #514756; border-color: #9b8ba2; }
+}
+.tracking-today p:not(.eyebrow),
+.tracking-log-page p:not(.eyebrow),
+.tracking-calendar-page p:not(.eyebrow),
+.tracking-insights-page p:not(.eyebrow),
+.tracking-choice,
+.tracking-symptom-choice,
+.tracking-symptom-button { font-size: 1rem; }
+@media print {
+  .tracking-hero, .tracking-save-bar { position: static; box-shadow: none; }
+  .tracking-cycle-orbit { display: none; }
+}
+
+/* A patterned period bar remains distinguishable beside the full-cycle bar. */
+@media screen {
+  .tracking-chart-period {
+    background-image: repeating-linear-gradient(135deg, transparent 0 4px, #fbeae6 4px 6px);
+    border-right: 2px solid #fff;
+  }
+  .tracking-hero p:not(.eyebrow), .tracking-hero-label { color: #fff; }
+  .tracking-hero-estimate .tracking-irregular-badge { font-size: 1rem; }
+  .tracking-strip-day > button, .tracking-calendar-day { min-height: 48px; }
+  .tracking-privacy, .tracking-legend > span, .tracking-chart-label,
+  .tracking-chart-label > strong, .tracking-chart-scale,
+  .tracking-calendar-weekday, .tracking-calendar-number { font-size: 1rem; }
+  .tracking-choice > svg, .tracking-symptom-choice > svg,
+  .tracking-symptom-button > span, .tracking-symptom-button > svg:last-child {
+    color: #755486;
+  }
+  .tracking-choice.selected, .tracking-symptom-choice.selected {
+    box-shadow: inset 0 0 0 .5px #755486;
+  }
+}
+@media screen and (max-width: 760px) {
+  .tracking-save-bar { bottom: calc(8rem + env(safe-area-inset-bottom)); }
+  .tracking-calendar-weekday { letter-spacing: -.035em; }
+}
+
+.tracking-intensity-list { display: grid; gap: .8rem; margin-top: 1rem; }
+.tracking-intensity-field { min-width: 0; margin: 0; padding: 1rem; border: 1px solid var(--line); border-radius: 1rem; }
+.tracking-intensity-field legend { padding: 0 .25rem; font-weight: 650; }
+.tracking-intensity-field .tracking-choice-row { margin-top: .35rem; }
+.tracking-intensity-field .tracking-choice { min-height: 68px; padding: .65rem .45rem; }
+.tracking-fertility { display: grid; gap: .8rem; }
+.tracking-fertility p { margin: 0; }
+.tracking-fertility a { display: inline-flex; align-items: center; gap: .4rem; color: var(--plum-dark); font-weight: 650; text-decoration: underline; text-underline-offset: .15em; }
+.tracking-calendar-day.fertile:not(.logged):not(.predicted) { border: 1.5px dotted #42766e; background: #edf7f4; }
+.tracking-calendar-day.fertile .tracking-calendar-mark { color: #285d54; }
+.tracking-legend .legend-dot.fertile { background: #edf7f4; border: 1.5px dotted #285d54; border-radius: 2px; }
+.reminder-weekdays { min-width: 0; border: 1px solid var(--line); border-radius: 1rem; padding: .9rem; }
+.reminder-weekdays legend { padding: 0 .35rem; font-weight: 650; }
+.reminder-weekdays .settings-symptoms { margin-top: .3rem; }
+
+@media (prefers-contrast: more) {
+  .tracking-calendar-day.fertile:not(.logged):not(.predicted) { border-color: #173f39; color: #173f39; background: #fff; }
+  .tracking-calendar-day.fertile .tracking-calendar-mark { color: #173f39; }
+  .tracking-legend .legend-dot.fertile { border-color: #173f39; background: #fff; }
+  .tracking-fertility a { color: #3f2452; }
+  .tracking-intensity-field { border-color: #44374a; }
+  .reminder-weekdays { border-color: #44374a; }
+}
+
+/* Cycle tracking accents use the new slate-and-tan palette; alerts retain a distinct warm red. */
+.tracking-hero { background: linear-gradient(112deg, #25364f 0%, #41566b 65%, #6f8190 100%); }
+.tracking-hero-button { color: #18263a; background: #f4f0e9; border-color: #f4f0e9; }
+.tracking-hero-dot { background: #d7b995; }
+.tracking-orbit-center { color: #d7b995; }
+.tracking-orbit-small { background: #704b3e; }
+.tracking-calendar-day.logged { border-color: #853b3b; background: #f3e5e1; }
+.tracking-calendar-day.logged .tracking-calendar-number,
+.tracking-calendar-day.logged .tracking-calendar-mark { color: #853b3b; }
+.tracking-calendar-day.predicted { border-color: #6f8190; background: #eef1f1; }
+.tracking-calendar-day.predicted .tracking-calendar-number { color: #25364f; }
+.tracking-fertility { background: #e7ecee; border-color: #c7d0d3; }
+.tracking-fertility > svg { color: #704b3e; }
+.tracking-estimate-dates { color: #25364f; }
+.tracking-chart-cycle { background: #6f8190; }
+.tracking-chart-label > strong { color: #25364f; }
+.tracking-calendar-day.logged { color: #532a2b; }
+.tracking-gap-card { background: #efe3d4; border-color: #d7b995; }
