@@ -6,7 +6,7 @@ The working prototype is designed for a student such as Ananya, 17, who prefers 
 
 ## Project flow and status
 
-Fresh verification on 23 October 2026: after the lockfile repair, `npm ci` succeeds; **173/173 automated tests pass** and `npm run build` succeeds. Coverage includes diary-window patterns, optional symptom intensity, cautious fertility estimates and recurrence schedules. See [VALIDATION.md](VALIDATION.md) for evidence and limits.
+Fresh verification on 24 October 2026: after the lockfile repair, `npm ci` succeeds; **183/183 automated tests pass** and `npm run build` succeeds. Coverage includes English/Hindi urgent Ask phrasing, complete diary save/reload/edit flows, calendar month/date navigation and distinct overlapping day markers, alongside diary-window patterns, optional symptom intensity, cautious fertility estimates and recurrence schedules. See [VALIDATION.md](VALIDATION.md) for evidence and limits.
 
 
 Follow the step-by-step checklist in [PROJECT_PROGRESS.md](PROJECT_PROGRESS.md). That file records implementation and actual validation results; this README does not imply that an unrecorded browser check or deployment has passed.

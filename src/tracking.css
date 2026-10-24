@@ -227,7 +227,12 @@
 .tracking-calendar-day { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .2rem; width: 100%; min-width: 0; min-height: 76px; padding: .6rem .1rem; border: 1px solid #f0eaf2; border-radius: 1rem; color: var(--ink); background: #fff; font: inherit; cursor: pointer; }
 .tracking-calendar-day:hover { border-color: #b59ac7; background: #f6f1fa; }
 .tracking-calendar-number { display: grid; place-items: center; font-size: 1rem; line-height: 1.4; font-weight: 500; }
-.tracking-calendar-mark { display: flex; align-items: center; justify-content: center; min-height: 12px; font-size: 1rem; line-height: 1; color: #755486; }
+.tracking-calendar-mark { display: flex; align-items: center; justify-content: center; gap: 1px; min-height: 12px; font-size: 1rem; line-height: 1; color: #755486; }
+.tracking-calendar-marker { display: inline-flex; align-items: center; justify-content: center; min-width: 7px; min-height: 10px; font-size: 9px; line-height: 1; }
+.tracking-calendar-marker.logged { color: #853b3b; }
+.tracking-calendar-marker.predicted { color: #25364f; font-size: 10px; }
+.tracking-calendar-marker.fertile { color: #285d54; }
+.tracking-calendar-marker.symptom { color: #755486; }
 .tracking-calendar-day.has-log:not(.logged) { background: #fbf8fc; }
 .tracking-calendar-day.logged { border-color: #9c665d; background: #f6dfdc; border-radius: 1.7rem; }
 .tracking-calendar-day.logged .tracking-calendar-number { color: #8d5751; font-weight: 650; }

@@ -6,6 +6,7 @@ import { JSDOM, VirtualConsole } from 'jsdom';
 import React, { act } from 'react';
 import en from '../src/i18n/en.js';
 import { addDays, todayISO } from '../src/lib/dates.js';
+import { analyzeCycles } from '../src/lib/cycle.js';
 
 // A disposable DOM only: no browser, network, OS notifications or real diary.
 const virtualConsole = new VirtualConsole();
@@ -316,6 +317,99 @@ test('React UI: symptom intensity stays optional, persists after reload, and rea
   assert.match(bodyText().toLowerCase(), /strong 1/);
 });
 
+test('React UI: a same-date Ask/log shortcut query selects the newly requested symptom', async () => {
+  await clickButton(text('welcome.fresh'));
+  await waitFor(() => !!document.querySelector('.app-shell'), 'Fresh diary should open.');
+  const tracked = envelope().data.settings.trackedSymptoms;
+  assert.ok(tracked.length >= 2, 'At least two symptoms should be available for shortcut navigation.');
+  await navigate('/log');
+  const date = todayISO();
+  const openShortcut = async symptom => {
+    await act(async () => {
+      window.history.pushState({}, '', `/log?date=${date}&symptom=${symptom}`);
+      window.dispatchEvent(new window.PopStateEvent('popstate'));
+    });
+    await waitFor(() => findButton(text(`tracking.symptom.${symptom}`))?.getAttribute('aria-pressed') === 'true', `Shortcut ${symptom} should be selected.`);
+  };
+  await openShortcut(tracked[0]);
+  assert.equal(findButton(text(`tracking.symptom.${tracked[0]}`)).getAttribute('aria-pressed'), 'true');
+  await openShortcut(tracked[1]);
+  assert.equal(findButton(text(`tracking.symptom.${tracked[0]}`)).getAttribute('aria-pressed'), 'false', 'Changing only the shortcut query should reload the saved date before adding the new symptom.');
+  assert.equal(findButton(text(`tracking.symptom.${tracked[1]}`)).getAttribute('aria-pressed'), 'true');
+});
+
+test('React UI: a complete dated log survives reload, opens from Calendar, and edits only that date', async () => {
+  await startDemo({ adult: true });
+  const date = addDays(todayISO(), -2);
+  const neighborDate = addDays(date, -1);
+  const neighborBefore = structuredClone(envelope().data.logs[neighborDate] || null);
+  const symptomId = envelope().data.settings.trackedSymptoms[0];
+  assert.ok(symptomId, 'At least one symptom should be enabled for tracking.');
+
+  await navigate('/log');
+  await inputValue(findControl(text('tracking.date')), date);
+  await waitFor(() => new URLSearchParams(window.location.search).get('date') === date, 'The log date should update in the URL.');
+  await clickButton(text('tracking.periodOn'));
+  await clickButton(text('tracking.flow.heavy'));
+  await click(findControl(text('tracking.padFrequent')));
+  await click(findControl(text('tracking.largeClots')));
+  await inputValue(findControl(text('tracking.painScale')), '6');
+  await click(findControl(text('tracking.painDisrupts')));
+  await clickButton(text(`tracking.symptom.${symptomId}`));
+  await clickButton(text('tracking.intensity.moderate'));
+  await clickButton(text('tracking.mood.good'));
+  await clickButton(text('tracking.energy.high'));
+  await inputValue(findControl(text('tracking.sleep')), '6');
+  await inputValue(findControl(text('tracking.medicines')), 'Paracetamol');
+  const originalNote = 'Pain started at lunch.\nI had a quiet evening.';
+  await inputValue(findControl(text('tracking.privateNote')), originalNote);
+  await clickButton(text('tracking.saveLog'));
+  await waitFor(() => envelope()?.data?.logs?.[date]?.note === originalNote, 'The complete day should persist before reload.');
+  const stored = envelope().data.logs[date];
+  assert.deepEqual({ period: stored.period, flow: stored.flow, padFrequent: stored.padFrequent, largeClots: stored.largeClots, pain: stored.pain, painDisrupts: stored.painDisrupts, symptom: stored.symptoms.includes(symptomId), intensity: stored.symptomIntensity[symptomId], mood: stored.mood, energy: stored.energy, sleep: stored.sleep, medicines: stored.medicines, note: stored.note }, { period: true, flow: 'heavy', padFrequent: true, largeClots: true, pain: 6, painDisrupts: true, symptom: true, intensity: 2, mood: 'good', energy: 'high', sleep: 6, medicines: 'Paracetamol', note: originalNote });
+
+  await remount();
+  if (window.location.pathname !== '/log') await navigate('/log');
+  assert.equal(findControl(text('tracking.date')).value, date);
+  assert.ok(findButton(text('tracking.periodOn')).classList.contains('selected'));
+  assert.ok(findButton(text('tracking.flow.heavy')).classList.contains('selected'));
+  assert.equal(findControl(text('tracking.padFrequent')).checked, true);
+  assert.equal(findControl(text('tracking.largeClots')).checked, true);
+  assert.equal(findControl(text('tracking.painScale')).value, '6');
+  assert.equal(findControl(text('tracking.painDisrupts')).checked, true);
+  assert.equal(findButton(text(`tracking.symptom.${symptomId}`)).getAttribute('aria-pressed'), 'true');
+  assert.ok(findButton(text('tracking.intensity.moderate')).classList.contains('selected'));
+  assert.ok(findButton(text('tracking.mood.good')).classList.contains('selected'));
+  assert.ok(findButton(text('tracking.energy.high')).classList.contains('selected'));
+  assert.equal(findControl(text('tracking.sleep')).value, '6');
+  assert.equal(findControl(text('tracking.medicines')).value, 'Paracetamol');
+  assert.equal(findControl(text('tracking.privateNote')).value, originalNote);
+
+  await navigate('/calendar');
+  const monthTitle = () => document.querySelector('.tracking-calendar-toolbar h2').textContent;
+  const shownMonth = monthTitle();
+  const [year, month] = date.split('-').map(Number);
+  const previousMonth = new Intl.DateTimeFormat('en-IN', { month: 'long', year: 'numeric' }).format(new Date(year, month - 2, 1, 12));
+  await clickButton(text('tracking.previousMonth'));
+  assert.equal(monthTitle(), previousMonth, 'Previous month should render its own month grid.');
+  await clickButton(text('tracking.nextMonth'));
+  assert.equal(monthTitle(), shownMonth, 'Next month should restore the current month.');
+  await clickButton(text('tracking.today'));
+  assert.equal(monthTitle(), shownMonth, 'Today should return the calendar to the current month.');
+  const dateLabel = new Intl.DateTimeFormat('en-IN', { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(`${date}T12:00:00`));
+  const dayButton = [...document.querySelectorAll('.tracking-calendar-day')].find(button => button.getAttribute('aria-label')?.startsWith(dateLabel));
+  assert.ok(dayButton, 'The logged date should have a selectable calendar cell.');
+  await click(dayButton);
+  await waitFor(() => window.location.pathname === '/log' && new URLSearchParams(window.location.search).get('date') === date, 'Calendar selection should open that exact dated log.');
+  assert.equal(findControl(text('tracking.date')).value, date);
+  assert.equal(findControl(text('tracking.privateNote')).value, originalNote);
+  const editedNote = 'Edited from Calendar: saved to this date.';
+  await inputValue(findControl(text('tracking.privateNote')), editedNote);
+  await clickButton(text('tracking.saveLog'));
+  await waitFor(() => envelope()?.data?.logs?.[date]?.note === editedNote, 'The edited calendar date should save.');
+  assert.deepEqual(envelope().data.logs[neighborDate] || null, neighborBefore, 'Editing one date must not overwrite its neighbor.');
+});
+
 test('React UI: regular adult history shows cautious fertile estimates and marks estimated days in the calendar', async () => {
   await startDemo({ adult: true });
   const wrapper = envelope();
@@ -335,6 +429,9 @@ test('React UI: regular adult history shows cautious fertile estimates and marks
       state.logs[date] = { ...template, date, period: true };
     }
   }
+  state.logs[today].symptoms = ['cramps'];
+  const predictedDate = analyzeCycles(state.logs, { ...state.profile, trackedSymptoms: state.settings.trackedSymptoms, today }).prediction.from;
+  state.logs[predictedDate] = { ...template, date: predictedDate, symptoms: ['cramps'] };
   localStorage.setItem('saheli.v1', JSON.stringify(wrapper));
   await remount();
   await waitFor(() => !!document.querySelector('.tracking-fertility'), 'Regular adult cycles should expose the opt-in fertility estimate card.');
@@ -345,6 +442,20 @@ test('React UI: regular adult history shows cautious fertile estimates and marks
   const fertileDays = [...document.querySelectorAll('.tracking-calendar-day.fertile')];
   assert.ok(fertileDays.length > 0, 'The predicted fertile range should be visibly marked in the current calendar.');
   assert.ok(fertileDays.some(day => day.getAttribute('aria-label')?.includes(text('tracking.fertileDay'))), 'Fertile markers need an accessible text label.');
+  assert.ok(fertileDays.some(day => day.querySelector('.tracking-calendar-marker.fertile')), 'Eligible fertile days need their own visible marker, including when another state overlaps.');
+  const todayCell = document.querySelector('.tracking-calendar-day[aria-current="date"]');
+  assert.ok(todayCell.classList.contains('logged'));
+  assert.ok(todayCell.querySelector('.tracking-calendar-marker.logged'), 'Logged period days need a visible droplet marker.');
+  assert.ok(todayCell.querySelector('.tracking-calendar-marker.symptom'), 'Symptom days need a separate visible marker even when logged as period days.');
+  assert.ok(todayCell.getAttribute('aria-label').includes(text('tracking.loggedPeriod')));
+  assert.ok(todayCell.getAttribute('aria-label').includes(text('tracking.symptomCount').replace('{count}', '1')));
+  if (predictedDate.slice(0, 7) !== today.slice(0, 7)) await clickButton(text('tracking.nextMonth'));
+  const predictedCell = [...document.querySelectorAll('.tracking-calendar-day')].find(day => day.getAttribute('aria-label')?.startsWith(new Intl.DateTimeFormat('en-IN', { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(`${predictedDate}T12:00:00`))));
+  assert.ok(predictedCell, 'The estimated date should appear in its month.');
+  assert.ok(predictedCell.querySelector('.tracking-calendar-marker.predicted'), 'Predicted days need their own visible marker.');
+  assert.ok(predictedCell.querySelector('.tracking-calendar-marker.symptom'), 'Predicted and symptom markers must both remain visible.');
+  assert.ok(predictedCell.getAttribute('aria-label').includes(text('tracking.predictedDay')));
+  assert.ok(predictedCell.getAttribute('aria-label').includes(text('tracking.symptomCount').replace('{count}', '1')));
 });
 
 test('React UI: a custom weekly reminder saves selected weekdays and stays opt-in', async () => {

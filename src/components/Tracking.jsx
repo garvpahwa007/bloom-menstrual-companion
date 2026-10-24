@@ -89,6 +89,7 @@ function CheckField({ checked, onChange, children }) {
 export function LogScreen({ state, t, lang, onSaveLog, onNavigate }) {
   const [params, setParams] = useSearchParams();
   const paramDate = params.get('date');
+  const symptomParam = params.get('symptom');
   const date = isLocalDate(paramDate) ? paramDate : todayISO();
   const [log, setLog] = useState(() => ({ ...defaultLog(date), ...state.logs[date] }));
   const [saving, setSaving] = useState(false);
@@ -96,10 +97,10 @@ export function LogScreen({ state, t, lang, onSaveLog, onNavigate }) {
   const [error, setError] = useState('');
   useEffect(() => {
     const initial = { ...defaultLog(date), ...state.logs[date] };
-    const symptom = params.get('symptom');
+    const symptom = symptomParam;
     if (SYMPTOMS.some(item => item.id === symptom) && !initial.symptoms.includes(symptom)) initial.symptoms = [...initial.symptoms, symptom];
     setLog(initial); setSaved(false); setError('');
-  }, [date]);
+  }, [date, symptomParam]);
   const set = (key, value) => { setLog(old => ({ ...old, [key]: value })); setSaved(false); };
   const toggleSymptom = id => {
     setLog(old => {
@@ -158,8 +159,8 @@ export function CalendarScreen({ state, analysis, t, lang, onNavigate }) {
         const log = state.logs[date];
         const predicted = !state.profile.pregnancyEnabled && analysis.prediction && date >= analysis.prediction.from && date <= analysis.prediction.to;
         const fertile = showFertility && date >= analysis.fertile.from && date <= analysis.fertile.to;
-        const labels = [dateText(date, lang, { day: 'numeric', month: 'long', year: 'numeric' }), date === today ? t('tracking.today') : '', log?.period ? t('tracking.loggedPeriod') : predicted ? t('tracking.predictedDay') : '', fertile ? t('tracking.fertileDay') : '', log?.symptoms?.length ? t('tracking.symptomCount', { count: log.symptoms.length }) : ''].filter(Boolean).join(', ');
-        return <button key={date} className={`tracking-calendar-day ${log?.period ? 'logged' : ''} ${predicted ? 'predicted' : ''} ${fertile ? 'fertile' : ''} ${date === today ? 'is-today' : ''} ${log ? 'has-log' : ''}`} aria-label={labels} aria-current={date === today ? 'date' : undefined} onClick={() => onNavigate(`/log?date=${date}`)}><span className="tracking-calendar-number">{new Intl.NumberFormat(locale(lang)).format(dateObject(date).getDate())}</span><span className="tracking-calendar-mark" aria-hidden="true">{log?.period ? <Droplets size={11} /> : predicted ? '◌' : fertile ? '✦' : log?.symptoms?.length ? '•' : '\u00a0'}</span></button>;
+        const labels = [dateText(date, lang, { day: 'numeric', month: 'long', year: 'numeric' }), date === today ? t('tracking.today') : '', log?.period ? t('tracking.loggedPeriod') : '', predicted ? t('tracking.predictedDay') : '', fertile ? t('tracking.fertileDay') : '', log?.symptoms?.length ? t('tracking.symptomCount', { count: log.symptoms.length }) : ''].filter(Boolean).join(', ');
+        return <button key={date} className={`tracking-calendar-day ${log?.period ? 'logged' : ''} ${predicted ? 'predicted' : ''} ${fertile ? 'fertile' : ''} ${date === today ? 'is-today' : ''} ${log ? 'has-log' : ''}`} aria-label={labels} aria-current={date === today ? 'date' : undefined} onClick={() => onNavigate(`/log?date=${date}`)}><span className="tracking-calendar-number">{new Intl.NumberFormat(locale(lang)).format(dateObject(date).getDate())}</span><span className="tracking-calendar-mark" aria-hidden="true">{log?.period && <span className="tracking-calendar-marker logged"><Droplets size={8} /></span>}{predicted && <span className="tracking-calendar-marker predicted">◌</span>}{fertile && <span className="tracking-calendar-marker fertile">✦</span>}{log?.symptoms?.length > 0 && <span className="tracking-calendar-marker symptom">•</span>}</span></button>;
       })}</div>
       <div className="tracking-legend"><span><i className="legend-dot logged" />{t('tracking.loggedPeriod')}</span><span><i className="legend-dot predicted" />{t('tracking.estimatedPeriod')}</span>{showFertility && <span><i className="legend-dot fertile" />{t('tracking.fertileEstimate')}</span>}<span><i className="legend-dot symptom" />{t('tracking.symptoms')}</span></div>
       <p className="muted tracking-calendar-footnote"><Info size={16} aria-hidden="true" />{t('tracking.calendarEstimateNote')}</p>{showFertility && <p className="muted tracking-calendar-footnote">{t('tracking.notContraception')}</p>}
@@ -188,4 +189,3 @@ export function InsightsScreen({ state, analysis, t, lang, onNavigate, onUpdateS
     <PrivacyNote t={t} />
   </div>;
 }
-

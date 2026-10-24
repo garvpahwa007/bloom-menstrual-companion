@@ -14,7 +14,15 @@ const cases = [
   { label: 'Hindi PCOD/PCOS terminology question matches Roman abbreviations', question: 'PCOD और PCOS दोनों शब्द क्यों दिखते हैं?', lang: 'hi', id: 'pcodName', match: /FOGSI की एक चिकित्सकीय एल्गोरिदम पुस्तिका/ },
   { label: '14-year-old gets adolescent-appropriate care information', question: 'I am 14 and my periods are irregular', id: 'first', match: /trusted adult|clinician/i, consult: true },
   { label: 'pregnancy possibility plus bleeding is urgent', question: 'I might be pregnant and I am bleeding', id: 'urgent', safety: 'urgent', match: /Get medical help now/, consult: true },
+  { label: 'possible pregnancy plus spotting is urgent', question: 'Pregnancy might be possible and I have spotting', id: 'urgent', safety: 'urgent', match: /Get medical help now/, consult: true, urgentSources: true },
+  { label: 'possible pregnancy plus severe low abdominal pain is urgent', question: 'I could be pregnant and have severe pain low in my abdomen', id: 'urgent', safety: 'urgent', match: /Get medical help now/, consult: true, urgentSources: true },
+  { label: 'Hindi possible pregnancy plus bleeding is urgent', question: 'मैं गर्भवती हो सकती हूँ और हल्का खून आ रहा है', lang: 'hi', id: 'urgent', safety: 'urgent', match: /अभी चिकित्सा मदद लें/, consult: true, urgentSources: true },
+  { label: 'Hindi possible pregnancy plus severe lower-belly pain is urgent', question: 'गर्भ ठहरने की संभावना है और पेट के निचले हिस्से में बहुत तेज दर्द है', lang: 'hi', id: 'urgent', safety: 'urgent', match: /अभी चिकित्सा मदद लें/, consult: true, urgentSources: true },
   { label: 'heavy bleeding plus dizziness is urgent', question: 'I have very heavy bleeding and feel dizzy', id: 'urgent', safety: 'urgent', match: /112/, consult: true },
+  { label: 'heavy bleeding plus light-headedness is urgent', question: 'I am soaking a pad every hour and feel light-headed', id: 'urgent', safety: 'urgent', match: /112/, consult: true, urgentSources: true },
+  { label: 'heavy bleeding plus near-fainting is urgent', question: 'My bleeding is very heavy and I nearly fainted', id: 'urgent', safety: 'urgent', match: /112/, consult: true, urgentSources: true },
+  { label: 'Hindi heavy bleeding plus dizziness is urgent', question: 'बहुत ज़्यादा खून आ रहा है, पैड हर घंटे भर जाता है और सिर घूम रहा है', lang: 'hi', id: 'urgent', safety: 'urgent', match: /112/, consult: true, urgentSources: true },
+  { label: 'Hindi heavy bleeding plus faintness is urgent', question: 'बहुत अधिक रक्तस्राव है और बेहोशी लग रही है', lang: 'hi', id: 'urgent', safety: 'urgent', match: /112/, consult: true, urgentSources: true },
   { label: 'sudden severe pain is urgent', question: 'I have sudden severe lower-belly pain', id: 'urgent', safety: 'urgent', match: /Get medical help now/, consult: true },
   { label: 'ovulation explanation carries pregnancy-prevention limitation', question: 'What is ovulation?', id: 'ovulation', match: /cannot be used to prevent pregnancy/i },
   { label: 'fertility question does not promise safe days', question: 'Are there safe days to prevent pregnancy?', id: 'safeDays', match: /cannot tell you a time that guarantees no pregnancy/i },
@@ -37,6 +45,7 @@ for (const item of cases) {
       assert.match(answer.text, /112/);
       assert.match(answer.text, /108/);
     }
+    if (item.urgentSources) for (const id of ['emergency', 'heavy', 'ectopic', 'pain']) assert.ok(answer.sourceIds.includes(id), `Urgent response must retain ${id} source for: ${item.question}`);
     if (answer.safety === 'selfHarm') {
       assert.match(answer.text, /112/);
       assert.match(answer.text, /14416/);
