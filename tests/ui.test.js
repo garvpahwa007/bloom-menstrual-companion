@@ -132,6 +132,9 @@ after(() => { URL.createObjectURL = originalCreateURL; URL.revokeObjectURL = ori
 test('React UI: fresh onboarding creates an empty private diary', async () => {
   assert.ok(findButton(text('welcome.demo')));
   assert.ok(findButton(text('welcome.fresh')));
+  assert.equal(normalize(document.querySelector('.welcome-top .brand strong')?.textContent), text('app.name'));
+  assert.equal(document.querySelector('.welcome-top .bloom-brand-mark')?.getAttribute('src'), '/bloom-mark.png');
+  assert.equal(document.querySelector('.welcome-logo-art')?.getAttribute('src'), '/bloom-logo.png');
   assert.equal(localStorage.length, 0);
   await clickButton(text('welcome.fresh'));
   await waitFor(() => !!document.querySelector('.app-shell'), 'Fresh onboarding should open Today.');
@@ -153,6 +156,8 @@ test('React UI: demo onboarding shows fictional history, irregularity and an est
 test('React UI: compact app shell provides the five reference-style mobile destinations', async () => {
   await startDemo();
   assert.equal(document.querySelector('.topbar-brand')?.getAttribute('href'), '/');
+  assert.equal(normalize(document.querySelector('.topbar-brand strong')?.textContent), text('app.name'));
+  assert.equal(document.querySelector('.topbar-brand .bloom-brand-mark')?.getAttribute('src'), '/bloom-mark.png');
   assert.equal(normalize(document.querySelector('.demo-data-pill')?.textContent), text('header.demoData'));
   assert.equal(findButton(text('nav.ask'))?.classList.contains('ask-shortcut'), true);
   const tabs = [...document.querySelectorAll('.mobile-bottom .nav-item')];
@@ -161,7 +166,7 @@ test('React UI: compact app shell provides the five reference-style mobile desti
     text('nav.today'), text('nav.calendar'), text('nav.insightsShort'), text('nav.learn'), text('nav.you'),
   ]);
   await clickButton(text('nav.ask'));
-  await waitFor(() => window.location.pathname === '/ask', 'The compact Ask shortcut should navigate to Ask Saheli.');
+  await waitFor(() => window.location.pathname === '/ask', 'The compact Ask shortcut should navigate to Ask Bloom.');
 });
 
 test('React UI: Privacy & Data explains local storage and exposes backup controls from navigation and Settings', async () => {

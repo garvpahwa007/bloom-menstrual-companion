@@ -1,4 +1,4 @@
-# Saheli
+# Bloom
 
 A free, private menstrual-health companion for women and girls, with a particular focus on people trying to understand irregular periods. It turns daily logs into clear estimates, useful questions and guidance on when to seek professional care.
 
@@ -6,7 +6,7 @@ The working prototype is designed for a student such as Ananya, 17, who prefers 
 
 ## Project flow and status
 
-Fresh verification on 24 October 2026: after the lockfile repair, `npm ci` succeeds; **183/183 automated tests pass** and `npm run build` succeeds. Coverage includes English/Hindi urgent Ask phrasing, complete diary save/reload/edit flows, calendar month/date navigation and distinct overlapping day markers, alongside diary-window patterns, optional symptom intensity, cautious fertility estimates and recurrence schedules. See [VALIDATION.md](VALIDATION.md) for evidence and limits.
+Fresh verification on 24 October 2026: after the lockfile repair, `npm ci` succeeds; **184/184 automated tests pass** and `npm run build` succeeds. Coverage includes English/Hindi urgent Ask phrasing, complete diary save/reload/edit flows, calendar month/date navigation and distinct overlapping day markers, the Bloom logo/name in both shell and Welcome, alongside diary-window patterns, optional symptom intensity, cautious fertility estimates and recurrence schedules. See [VALIDATION.md](VALIDATION.md) for evidence and limits.
 
 
 Follow the step-by-step checklist in [PROJECT_PROGRESS.md](PROJECT_PROGRESS.md). That file records implementation and actual validation results; this README does not imply that an unrecorded browser check or deployment has passed.
@@ -118,7 +118,7 @@ The visit overview aggregates the complete logged history instead of selecting o
 - Listen uses available local browser speech voices. A suitable local voice may be unavailable, particularly for Hindi; the app should not use a remote voice as a silent fallback.
 - Notifications require permission and an open running app. This prototype does not promise background or closed-browser delivery.
 
-Custom and medicine reminders can be set for one date, every day from an optional start date, or selected weekdays; new personal reminders are off until enabled. Checks and notifications run only while Saheli is open, not as background alarms. Check-up reminders use a date and time chosen by the user; they do not invent an appointment schedule or book a consultation. Discreet mode uses neutral wording.
+Custom and medicine reminders can be set for one date, every day from an optional start date, or selected weekdays; new personal reminders are off until enabled. Checks and notifications run only while Bloom is open, not as background alarms. Check-up reminders use a date and time chosen by the user; they do not invent an appointment schedule or book a consultation. Discreet mode uses neutral wording.
 
 ## Deploy from GitHub
 
@@ -154,6 +154,6 @@ Pregnancy education has 42 separately authored weekly cards. Weeks 4–41 use th
 
 Real AI, moderated community and Tamil remain intentionally optional extensions from the original brief. Independent clinician verification, robust background reminders and a full installable offline/PWA experience are outside this version. Future network features would need separate consent and a changed privacy description. Before public health use, seek clinical review, native-language review, accessibility testing and a security assessment. The prototype does not claim clinical or full accessibility certification.
 
-The Vercel production deployment is live at [Saheli](https://saheli-menstrual-companion.vercel.app/). The homepage and direct `/calendar` and `/privacy` routes were verified; see [VALIDATION.md](VALIDATION.md) for evidence and limits. The Vercel project is connected to the private GitHub repository `garvpahwa007/saheli-menstrual-companion`; pushes to `main` trigger production builds.
+The existing Vercel URL is [saheli-menstrual-companion.vercel.app](https://saheli-menstrual-companion.vercel.app/), connected to the private GitHub repository `garvpahwa007/saheli-menstrual-companion`. As of 24 October 2026, the public site was still serving older assets after a push to `main`; confirm the Vercel deployment before treating the Bloom rebrand as live. See [VALIDATION.md](VALIDATION.md) for evidence and limits.
 
 See [DEMO.md](DEMO.md) for a three-minute judge walkthrough and rehearsal checks.

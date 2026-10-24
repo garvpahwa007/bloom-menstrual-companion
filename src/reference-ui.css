@@ -1,4 +1,4 @@
-/* Saheli reference UI: warm paper, ink navy and quiet earthy accents. */
+/* Bloom reference UI: warm paper, ink navy and quiet earthy accents. */
 :root {
   --ink: #25364f;
   --muted: #68727c;
@@ -59,6 +59,9 @@ h1, h2, h3, .page-heading h1, .tracking-page-heading h1,
 .topbar-brand { display: none; align-items: center; gap: 7px; color: var(--ink); }
 .topbar-brand .brand-mark { color: var(--coffee); }
 .topbar-brand strong { font: 400 1.35rem Georgia, "Times New Roman", serif; letter-spacing: -.035em; }
+.bloom-brand-mark { display: block; width: 34px; height: 44px; flex: 0 0 auto; object-fit: contain; }
+.topbar-brand .bloom-brand-mark { width: 24px; height: 30px; }
+.welcome-top .brand .bloom-brand-mark { width: 32px; height: 42px; }
 .header-actions { gap: 9px; }
 .demo-data-pill {
   display: inline-flex;
@@ -132,6 +135,7 @@ h1, h2, h3, .page-heading h1, .tracking-page-heading h1,
 }
 .welcome-copy h1 { color: var(--ink); font-family: Georgia, "Times New Roman", "Noto Serif Devanagari", serif; font-weight: 400; }
 .welcome-art { color: var(--tan); background: var(--space-cadet); border-radius: 22px; }
+.welcome-logo-art { position: relative; z-index: 2; display: block; width: auto; max-width: 72%; max-height: 164px; object-fit: contain; }
 .art-orbit { border-color: #6f819066; }
 .art-orbit-two { border-color: var(--tan); }
 .art-spark { color: var(--tan); }
@@ -194,6 +198,7 @@ h1, h2, h3, .page-heading h1, .tracking-page-heading h1,
   .topbar-left { gap: 6px; }
   .topbar-brand { display: inline-flex; gap: 5px; }
   .topbar-brand .brand-mark svg { width: 22px; height: 22px; }
+  .topbar-brand .bloom-brand-mark { width: 22px; height: 28px; }
   .topbar-brand strong { font-size: 1.22rem; }
   .header-caption, .private-badge, .notification-button, .lock-shortcut { display: none !important; }
   .header-actions { gap: 3px; }
@@ -307,9 +312,12 @@ h1, h2, h3, .page-heading h1, .tracking-page-heading h1,
   .welcome-art .art-orbit.one { width: 174px; height: 174px; }
   .welcome-art .art-orbit.two { width: 142px; height: 142px; }
   .welcome-art .art-orbit.three { width: 78px; height: 78px; }
+  .welcome-art .art-orbit.three, .welcome-art .art-leaf, .welcome-art .art-caption { display: none; }
   .welcome-art .art-leaf { width: 38px; height: 38px; border-radius: 13px; }
   .welcome-art .art-leaf svg { width: 17px; height: 17px; }
   .welcome-art .art-caption { bottom: 8%; font-size: .58rem; }
+  .welcome-logo-art { max-height: 154px; max-width: 74%; }
+  .welcome-top .brand .bloom-brand-mark { width: 30px; height: 40px; }
   .welcome-copy h1 { font-size: 2.15rem; line-height: 1.1; }
   .welcome-copy > p:not(.eyebrow) { margin: 11px 0; font-size: .96rem; }
   .welcome-age { margin-top: 10px; }

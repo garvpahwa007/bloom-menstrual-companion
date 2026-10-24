@@ -1,4 +1,4 @@
-# Saheli feature-extension plan
+# Bloom feature-extension plan
 
 ## Scope and behavior
 
@@ -7,7 +7,7 @@ Extend the existing React/Vite single-page app; do not duplicate its current cyc
 1. **Cycle-pattern observations:** generalize the existing pattern summaries to other selected symptoms, using only positive diary entries timed near period days or in the five days before a logged period. Require at least three distinct cycles. Describe these as repeated entries, not causes, diagnoses, or predictions; keep the denominator limited to cycles with a diary entry in the relevant window.
 2. **Fertility estimate visibility:** make the existing estimate easier to find on Today and Calendar while preserving age/opt-in, irregular-cycle, insufficient-history, pregnancy-mode, and suspected-gap safeguards. Use a broad estimated range that covers five days before through one day after the estimated ovulation range, supported by ACOG/NHS source links. Label it uncertain and explicitly not usable to prevent pregnancy.
 3. **Detailed symptom tracking:** add optional per-symptom intensity values (mild, moderate, strong) to each day log. Preserve the existing symptom ID array and accept legacy records without ratings. Keep severity entries local and include rated-day counts in the clinician summary without inferring values for unrated logs.
-4. **Reminder options:** let custom and medicine reminders be one-time, daily, or weekly on selected weekdays. Preserve existing reminder records and default-disabled behavior. Keep the existing limitation: delivery is checked only while Saheli is open, with no background alarm promise.
+4. **Reminder options:** let custom and medicine reminders be one-time, daily, or weekly on selected weekdays. Preserve existing reminder records and default-disabled behavior. Keep the existing limitation: delivery is checked only while Bloom is open, with no background alarm promise.
 5. **Privacy & Data screen:** add a dedicated bilingual screen for device-local storage status, PIN-lock state and a link to its existing Settings controls. Provide JSON backup download, CSV export, and JSON/CSV restore using existing validation and confirmation behavior. Explain that exports are readable and unencrypted, diary records are not automatically uploaded, there is no automatic cloud backup, and browser storage may be cleared. Preserve the existing explicit delete confirmation.
 6. **Learn source-link visibility:** persistently underline all source citation links within Learn lessons and lesson diagrams in both languages. Keep existing source destinations, palette, hover behavior and keyboard-focus indication.
 
@@ -17,7 +17,7 @@ Reuse existing modules: `src/lib/cycle.js` for diary-derived pattern observation
 
 ## Design and safety
 
-Use Saheli’s existing calm, privacy-first visual style and English/Hindi voice. Prefer existing cards, buttons, and form conventions, with fieldsets/legends and accessible pressed states for intensity and weekday choices. The new data screen uses those same card and button patterns and makes local-only, unencrypted-export caveats visible beside the actions. Within Learn lessons and diagrams, source links are persistently underlined while retaining existing destinations and keyboard-focus indication. No new imagery is needed. Fertility estimates are calendar-based and uncertain, never a statement that ovulation occurred, and never contraception advice. Pattern summaries report only what the user logged. Reminder controls are opt-in and explain app-open-only delivery.
+Use Bloom’s existing calm, privacy-first visual style and English/Hindi voice. Prefer existing cards, buttons, and form conventions, with fieldsets/legends and accessible pressed states for intensity and weekday choices. The new data screen uses those same card and button patterns and makes local-only, unencrypted-export caveats visible beside the actions. Within Learn lessons and diagrams, source links are persistently underlined while retaining existing destinations and keyboard-focus indication. No new imagery is needed. Fertility estimates are calendar-based and uncertain, never a statement that ovulation occurred, and never contraception advice. Pattern summaries report only what the user logged. Reminder controls are opt-in and explain app-open-only delivery.
 
 ## Project structure
 

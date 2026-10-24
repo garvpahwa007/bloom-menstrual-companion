@@ -4,7 +4,7 @@ import { DEFAULT_REMINDERS, buildReminderMessage, isReminderDue, deliverReminder
 import { translator } from '../src/i18n/index.js';
 
 const t = key => ({
-  'app.name': 'Saheli', 'app.diary': 'Diary', 'reminders.neutral': 'Time to check in',
+  'app.name': 'Bloom', 'app.diary': 'Diary', 'reminders.neutral': 'Time to check in',
   'reminders.expected': 'Your estimated period window begins today.',
   'reminders.checkupBody': 'A reminder for the appointment you chose.',
   'reminders.medicineBody': 'Time for your chosen medicine reminder.',
@@ -87,7 +87,7 @@ test('non-period personal reminders remain available in pregnancy mode', () => {
 });
 
 test('reminder wording chooses the appropriate local fallback for each type', () => {
-  assert.deepEqual(buildReminderMessage(reminder(), {}, t), { title: 'Saheli', body: t('reminders.checkin') });
+  assert.deepEqual(buildReminderMessage(reminder(), {}, t), { title: 'Bloom', body: t('reminders.checkin') });
   assert.equal(buildReminderMessage(reminder({ type: 'period' }), {}, t).body, t('reminders.expected'));
   assert.equal(buildReminderMessage(reminder({ type: 'medicine' }), {}, t).body, t('reminders.medicineBody'));
   assert.equal(buildReminderMessage(reminder({ type: 'checkup' }), {}, t).body, t('reminders.checkupBody'));
@@ -115,7 +115,7 @@ test('granted browser notifications also keep the in-app banner', () => {
   class Granted { static permission = 'granted'; constructor(title, options) { notifications.push({ title, ...options }); } }
   const result = deliverReminder(reminder(), { t, onBanner: body => banners.push(body), NotificationClass: Granted });
   assert.deepEqual(banners, [t('reminders.checkin')]);
-  assert.deepEqual(notifications, [{ title: 'Saheli', body: t('reminders.checkin') }]);
+  assert.deepEqual(notifications, [{ title: 'Bloom', body: t('reminders.checkin') }]);
   assert.equal(result.banner, true); assert.equal(result.browser, true);
 });
 

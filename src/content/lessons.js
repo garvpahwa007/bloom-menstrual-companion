@@ -112,7 +112,7 @@ export const LESSONS = [
     "body": {
       "en": [
         "PCOS is a condition involving hormone and metabolism changes. Irregular periods, acne or extra facial or body hair can occur. These symptoms can have other causes too.",
-        "A FOGSI clinical algorithm booklet expands PCOD as “polycystic ovarian disease” and PCOS as “polycystic ovarian syndrome,” and uses both terms. It does not clearly say whether they mean different diagnoses or alternate names. Saheli uses PCOS as its main clinical term. If a report says PCOD, ask the clinician who issued it what they mean and what was assessed. A label, an app or an ultrasound result alone cannot diagnose you.",
+        "A FOGSI clinical algorithm booklet expands PCOD as “polycystic ovarian disease” and PCOS as “polycystic ovarian syndrome,” and uses both terms. It does not clearly say whether they mean different diagnoses or alternate names. Bloom uses PCOS as its main clinical term. If a report says PCOD, ask the clinician who issued it what they mean and what was assessed. A label, an app or an ultrasound result alone cannot diagnose you.",
         "Care depends on your symptoms and goals. A clinician may discuss everyday health habits, medicines for periods or skin symptoms, or fertility care when wanted. You deserve kind care at any body size."
       ],
       "hi": [

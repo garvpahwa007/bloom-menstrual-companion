@@ -404,7 +404,7 @@ export const FAQ = [
       ]
     },
     "answer": {
-      "en": "A FOGSI clinical algorithm booklet expands PCOD as polycystic ovarian disease and PCOS as polycystic ovarian syndrome, and uses both terms. It does not clearly say whether they mean different diagnoses or alternate names. Saheli uses PCOS as its main clinical term. If your report says PCOD, ask the clinician who issued it what they mean and what was assessed. A label or scan alone is not a diagnosis.",
+      "en": "A FOGSI clinical algorithm booklet expands PCOD as polycystic ovarian disease and PCOS as polycystic ovarian syndrome, and uses both terms. It does not clearly say whether they mean different diagnoses or alternate names. Bloom uses PCOS as its main clinical term. If your report says PCOD, ask the clinician who issued it what they mean and what was assessed. A label or scan alone is not a diagnosis.",
       "hi": "FOGSI की एक चिकित्सकीय एल्गोरिदम पुस्तिका में PCOD का पूरा नाम polycystic ovarian disease और PCOS का polycystic ovarian syndrome दिया गया है। पुस्तिका दोनों शब्द इस्तेमाल करती है, लेकिन यह साफ़ नहीं बताती कि वे अलग निदान हैं या एक ही स्थिति के अलग नाम। Saheli मुख्य चिकित्सकीय नाम के रूप में PCOS इस्तेमाल करता है। अगर आपकी रिपोर्ट में PCOD लिखा हो, तो उसे जारी करने वाले डॉक्टर से पूछें कि उनका क्या मतलब है और किन बातों की जाँच हुई। केवल नाम या स्कैन से निदान नहीं होता।"
     },
     "sourceIds": [
@@ -691,8 +691,8 @@ export const FAQ = [
       ]
     },
     "answer": {
-      "en": "Past cycle lengths vary, so the next date is uncertain. Saheli shows a range and hides ovulation estimates for irregular cycles. A prediction is not a medical result.",
-      "hi": "पिछले चक्रों की लंबाई बदलती है, इसलिए अगली तारीख तय नहीं। सहेली एक सीमा दिखाता है और अनियमित चक्र में अंडोत्सर्ग अनुमान छिपाता है। अनुमान जाँच का नतीजा नहीं है।"
+      "en": "Past cycle lengths vary, so the next date is uncertain. Bloom shows a range and hides ovulation estimates for irregular cycles. A prediction is not a medical result.",
+      "hi": "पिछले चक्रों की लंबाई बदलती है, इसलिए अगली तारीख तय नहीं। Bloom एक सीमा दिखाता है और अनियमित चक्र में अंडोत्सर्ग अनुमान छिपाता है। अनुमान जाँच का नतीजा नहीं है।"
     },
     "sourceIds": [
       "irregular"
@@ -1070,8 +1070,8 @@ export const FAQ = [
   {
     "id": "privacy",
     "question": {
-      "en": "Does Saheli send my data anywhere?",
-      "hi": "क्या सहेली मेरा डेटा कहीं भेजता है?"
+      "en": "Does Bloom send my data anywhere?",
+      "hi": "क्या Bloom मेरा डेटा कहीं भेजता है?"
     },
     "keywords": {
       "en": [
