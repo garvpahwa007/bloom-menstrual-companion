@@ -2,7 +2,7 @@
 .visit-columns{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:26px}
 .visit-columns p,.visit-columns li{font-size:1rem;line-height:1.7;overflow-wrap:anywhere}
 .visit-columns ul{padding-left:21px}.visit-evidence{display:block;margin-top:5px;font-weight:400}
-.visit-sheet header p,.visit-sheet footer{font-size:1rem}.lesson-paragraph{margin:26px 0}.lesson-paragraph .sources{margin-top:7px}.lesson-paragraph p{margin-bottom:8px}
+.visit-sheet header p,.visit-sheet footer{font-size:1rem}.lesson-paragraph{margin:26px 0}.lesson-paragraph .sources{margin-top:7px}.lesson-detail .sources a{text-decoration-line:underline;text-decoration-color:currentColor;text-decoration-thickness:1px;text-underline-offset:4px}.lesson-detail .sources a:hover,.lesson-detail .sources a:focus-visible{text-decoration-thickness:2px}.lesson-paragraph p{margin-bottom:8px}
 .diagram-step-number{display:grid;place-items:center;background:var(--plum);color:white;width:30px;height:30px;border-radius:50%;font-size:1rem}
 .diagram-grid{list-style:none;margin:0;padding:0}.diagram-step svg{color:var(--plum)}.diagram-step h3{margin:14px 0 8px}.diagram-step p{font-size:1rem;margin:0}.diagram-caption{font-size:1rem}
 .reminder-add .grid-2{margin:20px 0}.pregnancy-hero .sources a{color:#4b304e}.pregnancy-hero .sources{border-color:#a98eb0}
