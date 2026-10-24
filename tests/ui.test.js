@@ -150,6 +150,20 @@ test('React UI: demo onboarding shows fictional history, irregularity and an est
   assert.ok(Object.keys(envelope().data.logs).length > 30);
 });
 
+test('React UI: compact app shell provides the five reference-style mobile destinations', async () => {
+  await startDemo();
+  assert.equal(document.querySelector('.topbar-brand')?.getAttribute('href'), '/');
+  assert.equal(normalize(document.querySelector('.demo-data-pill')?.textContent), text('header.demoData'));
+  assert.equal(findButton(text('nav.ask'))?.classList.contains('ask-shortcut'), true);
+  const tabs = [...document.querySelectorAll('.mobile-bottom .nav-item')];
+  assert.deepEqual(tabs.map(link => link.getAttribute('href')), ['/', '/calendar', '/insights', '/learn', '/settings']);
+  assert.deepEqual(tabs.map(link => normalize(link.querySelector('span:not(.nav-count)')?.textContent)), [
+    text('nav.today'), text('nav.calendar'), text('nav.insightsShort'), text('nav.learn'), text('nav.you'),
+  ]);
+  await clickButton(text('nav.ask'));
+  await waitFor(() => window.location.pathname === '/ask', 'The compact Ask shortcut should navigate to Ask Saheli.');
+});
+
 test('React UI: Privacy & Data explains local storage and exposes backup controls from navigation and Settings', async () => {
   await startDemo();
   await navigate('/privacy');
