@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { execFileSync } from 'node:child_process';
 import CONFIG from '../src/config.js';
 import { addDays, daysBetween, todayISO } from '../src/lib/dates.js';
 import { getPeriods, analyzeCycles } from '../src/lib/cycle.js';
@@ -26,6 +27,15 @@ test('calendar date arithmetic survives leap days, month edges and daylight-savi
   assert.equal(daysBetween('2026-03-01', '2026-03-31'), 30);
   assert.equal(todayISO(new Date(2026, 9, 22, 23, 59)), '2026-10-22');
   assert.throws(() => addDays('2026-02-30', 1));
+});
+
+test('date-only values remain local calendar dates across UTC offsets and DST', () => {
+  const script = `import { todayISO, addDays, formatDate } from './src/lib/dates.js'; console.log(JSON.stringify([todayISO(new Date(2026, 2, 8, 23, 59)), addDays('2026-03-08', 1), formatDate('2026-03-08', 'en'), formatDate('2026-03-09', 'en')]));`;
+  const expected = ['2026-03-08', '2026-03-09', '8 Mar', '9 Mar'];
+  for (const timezone of ['America/Los_Angeles', 'Asia/Kolkata', 'Pacific/Kiritimati']) {
+    const output = execFileSync(process.execPath, ['--input-type=module', '-e', script], { cwd: process.cwd(), env: { ...process.env, TZ: timezone }, encoding: 'utf8' });
+    assert.deepEqual(JSON.parse(output), expected, `Calendar dates must be stable in ${timezone}`);
+  }
 });
 
 test('28-day regular cycles use first day to first day and omit unfinished cycle', () => {

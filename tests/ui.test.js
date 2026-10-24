@@ -7,6 +7,7 @@ import React, { act } from 'react';
 import en from '../src/i18n/en.js';
 import { addDays, todayISO } from '../src/lib/dates.js';
 import { analyzeCycles } from '../src/lib/cycle.js';
+import { SYMPTOMS } from '../src/data/symptoms.js';
 
 // A disposable DOM only: no browser, network, OS notifications or real diary.
 const virtualConsole = new VirtualConsole();
@@ -322,14 +323,69 @@ test('React UI: discreet mode persists the Diary title and neutral favicon', asy
   assert.equal(document.querySelector('link[rel="icon"]').getAttribute('href'), favicon);
 });
 
-test('React UI: Learn remains usable without any local speech voice', async () => {
+test('React UI: language, largest text, contrast, read-aloud, age, symptoms and discreet mode persist after reload', async () => {
+  await startDemo({ adult: true }); await navigate('/settings');
+  await inputValue(document.querySelectorAll('.settings-fields select')[1], 'largest');
+  await click(document.querySelectorAll('.settings-grid .toggle-row input')[0]);
+  await click(document.querySelectorAll('.settings-grid .toggle-row input')[1]);
+  await inputValue(document.querySelectorAll('.settings-grid select')[2], 'under18');
+  const symptom = document.querySelector('.settings-symptoms input[type="checkbox"]');
+  const symptomId = SYMPTOMS[0].id;
+  const wasTracked = symptom.checked;
+  await click(symptom);
+  await click(document.querySelectorAll('.settings-grid .toggle-row input')[4]);
+  await inputValue(document.querySelectorAll('.settings-fields select')[0], 'hi');
+  await waitFor(() => document.documentElement.lang === 'hi' && document.documentElement.dataset.size === 'largest' && document.documentElement.dataset.contrast === 'high', 'Settings should apply before reload.');
+  await remount();
+  assert.equal(document.documentElement.lang, 'hi');
+  assert.equal(document.documentElement.dataset.size, 'largest');
+  assert.equal(document.documentElement.dataset.contrast, 'high');
+  assert.equal(envelope().data.settings.language, 'hi');
+  assert.equal(envelope().data.settings.textSize, 'largest');
+  assert.equal(envelope().data.settings.highContrast, true);
+  assert.equal(envelope().data.settings.readAloud, true);
+  assert.equal(envelope().data.settings.discreet, true);
+  assert.equal(envelope().data.profile.ageGroup, 'under18');
+  assert.equal(envelope().data.settings.trackedSymptoms.includes(symptomId), !wasTracked);
+});
+
+test('React UI: every Learn lesson has sources and a visible local-voice Listen control', async () => {
   await startDemo(); await navigate('/learn');
-  await clickButton(text('learn.read'));
-  await waitFor(() => !!document.querySelector('.lesson-detail'), 'A lesson should open.');
-  assert.ok(bodyText().includes(text('learn.noVoice')));
-  assert.equal(findButton(text('learn.listen')), undefined);
-  assert.ok(document.querySelector('.lesson-detail .sources a[href^="https:"]'));
+  assert.equal(document.querySelectorAll('.lesson-card').length, 7, 'The full lesson catalogue should be listed.');
+  for (let index = 0; index < 7; index += 1) {
+    const lessonCard = document.querySelectorAll('.lesson-card')[index];
+    await click(lessonCard);
+    await waitFor(() => !!document.querySelector('.lesson-detail'), 'A lesson should open.');
+    const listen = findButton(text('learn.listen'));
+    assert.ok(listen, 'Every lesson should display Listen.');
+    assert.equal(listen.disabled, true, 'Listen stays disabled when the browser has no local voice.');
+    assert.ok(document.querySelector('#learn-listen-help'), 'Explain why local speech is unavailable.');
+    assert.ok(document.querySelector('.lesson-detail .sources a[href^="https:"]'), 'Every lesson should show its source.');
+    await clickButton(text('learn.back'));
+    await waitFor(() => !document.querySelector('.lesson-detail'), 'Returning from a lesson should restore the catalogue.');
+  }
   assert.equal(bodyText().includes(text('error.title')), false);
+});
+
+test('React UI: Ask answers include a localized clinician reminder for worrying symptoms', async () => {
+  await startDemo(); await navigate('/ask');
+  await inputValue(document.querySelector('#question'), 'Why are my periods late?');
+  await clickButton(text('ask.send'));
+  await waitFor(() => document.querySelector('.answer-bubble'), 'Ask should render an answer.');
+  assert.ok(document.querySelector('.answer-bubble').textContent.includes(text('ask.worryLine')));
+});
+
+test('React UI: Insights displays the history chart, cycle statistics and sample counts', async () => {
+  await startDemo(); await navigate('/insights');
+  assert.ok(document.querySelector('.tracking-chart[role="img"]'));
+  assert.ok(document.querySelector('.tracking-chart').getAttribute('aria-label').includes(text('tracking.cycleChartLabel')));
+  assert.equal(document.querySelectorAll('.tracking-stats .tracking-stat').length, 3);
+  for (const key of ['tracking.averageCycle', 'tracking.cycleRange', 'tracking.cyclePattern', 'tracking.periodStats']) {
+    assert.ok(bodyText().includes(text(key)), `${key} should be visible on Insights.`);
+  }
+  const patterns = [...document.querySelectorAll('.tracking-pattern')];
+  assert.ok(patterns.length > 0, 'Demo data should show eligible patterns.');
+  for (const pattern of patterns) assert.match(pattern.textContent, /Recorded in \d+ of \d+ cycles/);
 });
 
 test('React UI: confirmed pregnancy pauses estimates and saves an optional dated check-up reminder', async () => {
@@ -406,6 +462,30 @@ test('React UI: a same-date Ask/log shortcut query selects the newly requested s
   await openShortcut(tracked[1]);
   assert.equal(findButton(text(`tracking.symptom.${tracked[0]}`)).getAttribute('aria-pressed'), 'false', 'Changing only the shortcut query should reload the saved date before adding the new symptom.');
   assert.equal(findButton(text(`tracking.symptom.${tracked[1]}`)).getAttribute('aria-pressed'), 'true');
+});
+
+test('React UI: heavy-flow answers clear when flow changes or period is turned off', async () => {
+  await clickButton(text('welcome.fresh'));
+  await waitFor(() => !!document.querySelector('.app-shell'), 'Fresh diary should open.');
+  await navigate('/log');
+  await clickButton(text('tracking.periodOn'));
+  await clickButton(text('tracking.flow.heavy'));
+  await click(findControl(text('tracking.padFrequent')));
+  await click(findControl(text('tracking.largeClots')));
+  await clickButton(text('tracking.flow.light'));
+  await clickButton(text('tracking.flow.heavy'));
+  assert.equal(findControl(text('tracking.padFrequent')).checked, false);
+  assert.equal(findControl(text('tracking.largeClots')).checked, false);
+  await click(findControl(text('tracking.padFrequent')));
+  await click(findControl(text('tracking.largeClots')));
+  await clickButton(text('tracking.periodOff'));
+  await clickButton(text('tracking.periodOn'));
+  assert.equal(findControl(text('tracking.padFrequent')).checked, false);
+  assert.equal(findControl(text('tracking.largeClots')).checked, false);
+  await clickButton(text('tracking.saveLog'));
+  await waitFor(() => envelope()?.data?.logs?.[todayISO()], 'The clean heavy-flow answers should save.');
+  assert.equal(envelope().data.logs[todayISO()].padFrequent, false);
+  assert.equal(envelope().data.logs[todayISO()].largeClots, false);
 });
 
 test('React UI: a complete dated log survives reload, opens from Calendar, and edits only that date', async () => {
@@ -541,4 +621,9 @@ test('React UI: a custom weekly reminder saves selected weekdays and stays opt-i
   const saved = envelope().data.reminders.find(item => item.title === 'Weekly diary walk');
   assert.deepEqual(saved.recurrence, { frequency: 'weekly', weekdays: [1, 2, 3, 4] });
   assert.equal(saved.enabled, false, 'New personal reminders must remain off until the user enables them.');
+  await inputValue(findControl(text('reminders.label')), 'Morning medicine');
+  await inputValue(document.querySelector('.reminder-add select'), 'medicine');
+  await clickButton(text('reminders.add'));
+  await waitFor(() => envelope()?.data?.reminders?.some(item => item.title === 'Morning medicine'), 'The medicine reminder should save.');
+  assert.equal(envelope().data.reminders.find(item => item.title === 'Morning medicine').enabled, false, 'Medicine reminders must also remain off by default.');
 });

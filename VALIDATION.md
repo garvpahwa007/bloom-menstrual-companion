@@ -3,11 +3,11 @@
 ## Automated results
 
 - Environment: Node.js v22.13.0, npm 10.9.2.
-- `npm test`: **192 passed, 0 failed, 0 skipped**.
+- `npm test`: **197 passed, 0 failed, 0 skipped**.
 - `npm run build`: passed with Vite 6.4.5; output includes `dist/manifest.webmanifest`, `dist/sw.js`, square standard/maskable Bloom icons, HTML and hashed application JS/CSS.
 - `git diff --check`: passed.
-- Translation key parity: English/Hindi each contain 552 keys and no missing counterparts.
-- Automated coverage includes cycle/prediction safeguards; urgent English/Hindi Ask phrases; full log save/reload/edit; calendar navigation and co-occurring markers; fertility, reminders, pregnancy and source behavior; legacy JSON/CSV round trips; PIN encryption; encrypted-backup round trip with Unicode/private notes and fresh salt/IV; wrong-passphrase/tampered/unsupported wrapper non-destructive errors; encrypted-backup UI flow; cancellation before replacement; Today Bloom asset/disclosures; PWA manifest/icon/cache policy; Vercel static-file exclusions and headers; and bilingual axe audits including the encrypted-backup dialog.
+- Translation key parity: English/Hindi dictionaries have the same keys (553 after the Build 2 Ask reminder).
+- Automated coverage includes cycle/prediction safeguards and timezone-stable local dates; urgent English/Hindi Ask phrases and clinician reminder; full log save/reload/edit and heavy-flow clearing; calendar navigation and co-occurring markers; Insights chart/statistics/pattern counts; Learn sources/Listen controls; settings persistence; fertility, reminders, pregnancy and source behavior; legacy JSON/CSV round trips; PIN encryption; encrypted-backup round trip with Unicode/private notes and fresh salt/IV; wrong-passphrase/tampered/unsupported wrapper non-destructive errors; encrypted-backup UI flow; cancellation before replacement; Today Bloom asset/disclosures; PWA manifest/icon/cache policy; Vercel static-file exclusions and headers; and bilingual axe audits including the encrypted-backup dialog.
 
 ## Local production-preview browser checks
 
@@ -15,9 +15,11 @@ The production Vite preview (`npm run build` then `npm start`) was opened in hea
 
 The PWA worker registered once and created a versioned Bloom cache containing only `/index.html`, hashed JS/CSS, `/manifest.webmanifest`, favicon and generic Bloom artwork/icons. No diary-data storage or backup routes were present in the worker cache. After Chromium network emulation was switched offline, navigating directly to `/calendar` rendered the app shell via cached HTML and routed to Calendar. This is a localhost browser smoke test, not a real production-host/PWA installation test.
 
+Build 2 browser walkthrough used the local Vite development server, demo data and largest-text/high-contrast preferences. It traversed Today, Log, Calendar, Insights, Guidance, Visit, Learn catalogue/detail, Ask, Reminders, Pregnancy, Settings and Privacy at 1280×1100. No horizontal overflow or out-of-viewport visible controls were reported. The browser console showed the React DevTools informational notice but no runtime errors; DOM resource inspection found no cross-origin scripts, stylesheets, images or fonts. This browser interface could not be resized to the requested exact 360px state; see `BUILD_2_AUDIT.md` for that open check.
+
 ## Hosting and deployment status
 
-The current source config excludes manifest, service worker and declared icons from the Vercel SPA rewrite, sets worker/manifest MIME and `no-cache` headers for Vercel and Netlify, and retains SPA fallback. Feature commit `4240c02` was pushed to `main`. On 24 October, production checks confirmed that both https://bloom-period-companion.vercel.app/ (primary) and https://saheli-menstrual-companion.vercel.app/ (legacy alias) serve Bloom. The new host returned HTTP 200 for `/`, `/calendar`, `/manifest.webmanifest`, `/sw.js`, and `/bloom-app-192.png`, and direct `/calendar` loaded in Chromium. Canonical and Open Graph metadata are updated in source to the new primary URL; verify those tags again after the next Vercel deployment. The repository slug remains unchanged. The legacy local-storage key `saheli.v1` is intentionally retained to avoid making prior diaries inaccessible.
+The current source config excludes manifest, service worker and declared icons from the Vercel SPA rewrite, sets worker/manifest MIME and `no-cache` headers for Vercel and Netlify, and retains SPA fallback. Feature commit `4240c02` was pushed to `main`. On 24 October, production checks confirmed that both https://bloom-period-companion.vercel.app/ (primary) and https://saheli-menstrual-companion.vercel.app/ (legacy alias) serve Bloom. Both returned the new primary canonical/Open Graph values; the new host returned HTTP 200 for `/`, `/calendar`, `/manifest.webmanifest`, `/sw.js`, and `/bloom-app-192.png`, and direct `/calendar` loaded in Chromium. The repository slug remains unchanged. The legacy local-storage key `saheli.v1` is intentionally retained to avoid making prior diaries inaccessible. Build 2 changes are awaiting publication and a new production deployment check.
 
 ## Remaining limitations
 

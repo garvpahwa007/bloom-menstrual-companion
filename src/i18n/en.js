@@ -158,6 +158,7 @@ export default {
   "ask.send": "Ask question",
   "ask.suggestions": "YOU COULD ASK",
   "ask.unknown": "I don’t know that one. A doctor can help.",
+  "ask.worryLine": "If a symptom worries you or feels different, speak with a healthcare professional—even if it is not in your diary.",
   "ask.visit": "Prepare for my visit",
   "ask.clear": "Clear conversation",
   "ask.you": "You",

@@ -93,7 +93,7 @@ export function LogScreen({ state, t, lang, onSaveLog, onNavigate }) {
     if (SYMPTOMS.some(item => item.id === symptom) && !initial.symptoms.includes(symptom)) initial.symptoms = [...initial.symptoms, symptom];
     setLog(initial); setSaved(false); setError('');
   }, [date, symptomParam]);
-  const set = (key, value) => { setLog(old => ({ ...old, [key]: value })); setSaved(false); };
+  const set = (key, value) => { setLog(old => { const next = { ...old, [key]: value }; if ((key === 'flow' && value !== 'heavy') || (key === 'period' && value === false)) { next.padFrequent = false; next.largeClots = false; } return next; }); setSaved(false); };
   const toggleSymptom = id => {
     setLog(old => {
       const selected = old.symptoms.includes(id);
