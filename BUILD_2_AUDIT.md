@@ -39,6 +39,7 @@ Updated 24 October 2026. This audit checks the user's Build 2 requirements again
 - Browser route sweep at 1280×1100, largest text and high contrast: no horizontal overflow and no visible controls outside the viewport on all traversed screens.
 - Browser console: React DevTools informational notice only; no runtime errors observed.
 - Browser resource inspection: zero cross-origin scripts, stylesheets, images or font resources.
+- Commit `05bf602` was pushed to `main`; Vercel served the Build 2 bundle and primary canonical/Open Graph metadata on both the primary Bloom domain and legacy alias. Direct `/calendar` and `/ask` returned HTTP 200.
 
 ## Still not finished
 
