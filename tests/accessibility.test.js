@@ -6,6 +6,7 @@ import { JSDOM, VirtualConsole } from 'jsdom';
 import React, { act } from 'react';
 import { createDemoData } from '../src/data/demo.js';
 import { addDays, todayISO } from '../src/lib/dates.js';
+import { translator } from '../src/i18n/index.js';
 
 // This is an automated semantic audit of the actual React application. JSDOM
 // has no physical rendering/layout engine: it cannot reliably measure rendered
@@ -150,6 +151,18 @@ for (const language of ['en', 'hi']) {
       await audit(`${screen.name} ${language}`);
     });
   }
+
+  test(`Accessibility: encrypted-backup password dialog (${language})`, async () => {
+    const state = createDemoData(); state.settings.language = language;
+    await mount('/privacy', state);
+    const t = translator(language);
+    const button = [...document.querySelectorAll('button')].find(element => normalize(element.textContent) === t('settings.exportEncrypted'));
+    assert.ok(button, 'Privacy & Data must expose encrypted backup creation.');
+    await act(async () => { button.click(); });
+    assert.ok(document.querySelector('.backup-password-dialog'));
+    assert.ok(document.querySelector('#backup-passphrase'));
+    await audit(`Encrypted backup dialog ${language}`);
+  });
 
   test(`Accessibility: encrypted locked diary (${language})`, async () => {
     const state = createDemoData(); state.settings.language = language;

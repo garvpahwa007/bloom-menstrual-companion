@@ -111,7 +111,7 @@ async function importBackup(file) {
   assert.ok(control, 'The import file input must have its visible label.');
   Object.defineProperty(control, 'files', { configurable: true, value: [new NodeFile([file.content], file.name, { type: file.name.endsWith('.csv') ? 'text/csv' : 'application/json' })] });
   await act(async () => { control.dispatchEvent(new window.Event('change', { bubbles: true })); });
-  await waitFor(() => document.querySelector('[role="alertdialog"]'), 'Import should ask before replacing the diary.');
+  await waitFor(() => document.querySelector('[role="alertdialog"], [role="dialog"]'), 'Import should ask for a passphrase or replacement confirmation.');
 }
 
 beforeEach(async () => {
@@ -153,6 +153,23 @@ test('React UI: demo onboarding shows fictional history, irregularity and an est
   assert.ok(Object.keys(envelope().data.logs).length > 30);
 });
 
+test('React UI: compact Today uses the Bloom mark and keeps essential estimate status and details available', async () => {
+  await startDemo();
+  assert.equal(document.querySelector('.tracking-cycle-logo')?.getAttribute('src'), '/bloom-mark.png');
+  assert.equal(document.querySelector('.tracking-cycle-orbit')?.getAttribute('aria-hidden'), 'true');
+  assert.ok(document.querySelector('.tracking-cycle-orbit .tracking-cycle-logo'));
+  assert.ok(bodyText().includes(text('tracking.estimateCaveat')));
+  assert.ok(bodyText().includes(text('tracking.nextEstimate')));
+  assert.equal(document.querySelectorAll('.today-collapsible').length, 4);
+  assert.deepEqual([...document.querySelectorAll('.today-collapsible > summary')].map(item => normalize(item.textContent)), [text('tracking.overview'), text('tracking.recentAndInsights'), text('tracking.quickCheckIn'), text('tracking.learnAndPrivacy')]);
+  assert.equal(document.querySelector('.tracking-learn-banner')?.closest('details')?.open, false);
+  const overview = document.querySelector('.today-collapsible');
+  await click(overview.querySelector('summary'));
+  assert.equal(overview.open, true);
+  assert.ok(overview.textContent.includes(text('tracking.averageCycle')));
+  assert.ok(document.querySelector('.mobile-bottom'));
+});
+
 test('React UI: compact app shell provides the five reference-style mobile destinations', async () => {
   await startDemo();
   assert.equal(document.querySelector('.topbar-brand')?.getAttribute('href'), '/');
@@ -182,6 +199,40 @@ test('React UI: Privacy & Data explains local storage and exposes backup control
   await navigate('/settings');
   await clickButton(text('privacyData.open'));
   await waitFor(() => window.location.pathname === '/privacy', 'Settings should link to the Privacy & Data screen.');
+});
+
+test('React UI: encrypted backup prompts protect export and restore only after decryption and explicit confirmation', async () => {
+  await startDemo(); await navigate('/privacy');
+  assert.ok(findButton(text('settings.exportEncrypted')));
+  await clickButton(text('settings.exportEncrypted'));
+  assert.ok(document.querySelector('[role="dialog"]'));
+  assert.ok(bodyText().includes(text('settings.encryptedBackupBody')));
+  await inputValue(document.getElementById('backup-passphrase'), 'A unique passphrase for backup 2026');
+  await inputValue(findControl(text('settings.encryptedBackupConfirm')), 'A unique passphrase for backup 2026');
+  await clickButton(text('settings.encryptedBackupActionExport'));
+  await waitFor(() => downloads.some(file => file.name.endsWith('.bloombackup')), 'Encrypted backup should download.');
+  const file = downloads.at(-1);
+  const encryptedText = await file.blob.text();
+  assert.equal(encryptedText.includes('PRIVATE_NOTE_MARKER'), false);
+  const original = localStorage.getItem('saheli.v1');
+  await importBackup({ name: file.name, content: encryptedText });
+  assert.ok(document.querySelector('[role="dialog"]'));
+  await inputValue(document.getElementById('backup-passphrase'), 'Wrong unique phrase length ok');
+  await clickButton(text('settings.encryptedBackupActionImport'));
+  await waitFor(() => document.querySelector('[role="alert"]')?.textContent === text('settings.encryptedBackupWrongPassword'), 'Wrong passphrase should give a non-destructive error.');
+  assert.equal(localStorage.getItem('saheli.v1'), original);
+  await inputValue(document.getElementById('backup-passphrase'), 'A unique passphrase for backup 2026');
+  await clickButton(text('settings.encryptedBackupActionImport'));
+  await waitFor(() => document.querySelector('[role="alertdialog"]'), 'A successfully decrypted backup must still ask before replacing the diary.');
+  await clickButton(text('common.cancel'));
+  assert.equal(localStorage.getItem('saheli.v1'), original, 'Cancel must preserve current stored diary bytes.');
+  await importBackup({ name: file.name, content: encryptedText });
+  await inputValue(document.getElementById('backup-passphrase'), 'A unique passphrase for backup 2026');
+  await clickButton(text('settings.encryptedBackupActionImport'));
+  await waitFor(() => document.querySelector('[role="alertdialog"]'));
+  await clickButton(text('common.continue'));
+  await waitFor(() => bodyText().includes(text('settings.imported')), 'Confirmed encrypted restore should complete.');
+  assert.deepEqual(JSON.parse((await captureExport('json')).content), JSON.parse(original).data);
 });
 
 test('React UI: PIN form encrypts, lock survives reload, wrong PIN preserves data and correct PIN restores it', async () => {

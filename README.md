@@ -6,7 +6,7 @@ The working prototype is designed for a student such as Ananya, 17, who prefers 
 
 ## Project flow and status
 
-Fresh verification on 24 October 2026: after the lockfile repair, `npm ci` succeeds; **184/184 automated tests pass** and `npm run build` succeeds. Coverage includes English/Hindi urgent Ask phrasing, complete diary save/reload/edit flows, calendar month/date navigation and distinct overlapping day markers, the Bloom logo/name in both shell and Welcome, alongside diary-window patterns, optional symptom intensity, cautious fertility estimates and recurrence schedules. See [VALIDATION.md](VALIDATION.md) for evidence and limits.
+Fresh verification on 24 October 2026: after the lockfile repair, `npm ci` succeeds; **192/192 automated tests pass**, the production build succeeds, and `git diff --check` is clean. Coverage includes English/Hindi urgent Ask phrasing, complete diary save/reload/edit flows, calendar month/date navigation, the Today Bloom mark and compact disclosures, encrypted backups, bilingual dialog accessibility, and static-only PWA hosting/offline checks. The latest source update has not yet been deployed. See [VALIDATION.md](VALIDATION.md) for evidence and limits.
 
 
 Follow the step-by-step checklist in [PROJECT_PROGRESS.md](PROJECT_PROGRESS.md). That file records implementation and actual validation results; this README does not imply that an unrecorded browser check or deployment has passed.
@@ -19,12 +19,12 @@ The user flow is:
 4. Review the calendar and insights for actual entries, cautious estimates, and repeated symptoms in diary-recorded timing windows.
 5. Open doctor guidance and prepare a visit summary when useful.
 6. Read a lesson or ask an offline question.
-7. Open Privacy & Data to review local storage, export a JSON backup or CSV, restore a validated backup, or delete the diary.
+7. Open Privacy & Data to review local storage, export readable JSON/CSV or a passphrase-encrypted backup, restore a validated backup, or delete the diary.
 8. Choose language, accessibility, PIN and reminder settings.
 
 ## Stack and running locally
 
-React, Vite, Tailwind CSS and React Router; plain JavaScript throughout. Vite serves the development app; there is no Express server. Use Node.js **20.19 or later** and npm.
+Bloom is the app/package identity. React, Vite, Tailwind CSS and React Router; plain JavaScript throughout. A production-only worker precaches static application files for offline shell access; it never caches diary records or backup files. The service worker does not make external links or reminder delivery available offline. Vite serves the development app; there is no Express server. Use Node.js **20.19 or later** and npm.
 
 Run these commands from this folder:
 
@@ -33,7 +33,7 @@ npm ci
 npm run dev
 ```
 
-Open [http://localhost:5173](http://localhost:5173). There is no health-data API, account system or database.
+Open [http://localhost:5173](http://localhost:5173). There is no health-data API, account system or database. The old `saheli.v1` local-storage key remains for existing diaries.
 
 Run automated checks:
 

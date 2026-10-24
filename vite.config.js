@@ -1,9 +1,10 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
+import { bloomPwaPlugin } from './scripts/pwa-plugin.js';
 
 export default defineConfig({
-  plugins: [react(), tailwindcss(), {
+  plugins: [react(), tailwindcss(), bloomPwaPlugin(), {
     name: 'production-local-only-policy',
     transformIndexHtml: {
       order: 'pre',

@@ -38,6 +38,7 @@ export const CONFIG = Object.freeze({
   encryptionSaltBytes: 16,
   encryptionIvBytes: 12,
   maximumImportBytes: 5000000,
+  maximumEncryptedBackupBytes: 6800000,
   maximumSleepHours: 24,
   sleepInputStep: 0.5,
   historyChartCycles: 8,

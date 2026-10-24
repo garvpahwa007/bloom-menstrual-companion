@@ -6,5 +6,7 @@ import './styles.css';
 import './tracking.css';
 import './finish.css';
 import './reference-ui.css';
+import { registerPWA } from './pwa.js';
 
 createRoot(document.getElementById('root')).render(<BrowserRouter><App /></BrowserRouter>);
+registerPWA();

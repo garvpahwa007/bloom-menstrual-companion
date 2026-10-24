@@ -1,21 +1,21 @@
 Bloom latest working source — 24 October 2026
 
-Requires Node.js >=20.19 and npm. Final verification used Node.js v22.13.0 and npm 10.9.2.
+Requires Node.js >=20.19 and npm. Verification used Node.js v22.13.0 and npm 10.9.2.
 
 From this folder:
   npm ci
   npm run dev
 Open http://localhost:5173
 
-Final automated checks:
-  npm test       184 passed, 0 failed, 0 skipped
+Latest automated checks:
+  npm test       192 passed, 0 failed, 0 skipped
   npm run build  passed (Vite production build)
+  git diff --check passed
 
-To preview the production build, stop the development server, then run `npm start`.
-The app is a static React/Vite frontend; there is no health-data API or server-side diary storage.
+To preview the production build, run `npm start`. Bloom now builds a production-only installable app-shell PWA and has offline shell fallback; the worker caches static app files only, never diary data or backups. External source links and reminders are not promised offline.
 
-Existing production URL: https://saheli-menstrual-companion.vercel.app/ (Vercel). It was still serving older assets after the latest main push, so do not treat the Bloom rebrand as live until Vercel is verified. Earlier homepage, /calendar, /privacy and 360px English/Hindi checks are historical and do not replace physical-device, screen-reader or clinical review. The project remains connected to the private GitHub repository garvpahwa007/saheli-menstrual-companion. Vercel’s setting is Node 22.x, but the latest build selected Node 24.x because the package engine allows >=20.19; the build passed with a warning.
+The privacy screen retains plaintext-compatible JSON/CSV and also offers a passphrase-encrypted backup. The backup passphrase is not recoverable if forgotten and is separate from the app’s four-digit PIN. The local-storage key `saheli.v1` remains unchanged intentionally, so existing saved diaries continue to work.
 
-The FOGSI TOG Algorithms 4 booklet uses and expands both PCOD and PCOS but does not clearly resolve their relationship. The unavailable FOGSI adolescent FAQ is not cited. Qualified clinician and native-Hindi medical/plain-language reviews remain pending. See VALIDATION.md, MEDICAL_SOURCE_REVIEW.md, CLINICIAN_REVIEW_NOTE_PCOD.md and DEVICE_CHECKLIST.md.
+Existing public URL: https://saheli-menstrual-companion.vercel.app/ (Vercel). It has not been renamed or verified with this update because Vercel sign-in was unavailable and work proceeded without it. Do not assume these new changes are live. The private GitHub repository slug remains `garvpahwa007/saheli-menstrual-companion`.
 
-This is source code, not an installable phone app. Logs remain in browser storage; the Privacy & Data screen offers JSON backup, CSV export, restore and deletion. JSON/CSV files are plaintext. There is no automatic cloud backup. See README.md for privacy limits and the three-minute demo.
+A qualified clinician and native-Hindi medical/plain-language reviewer still need to check the health content and translations. Physical-device installation, screen-reader/VoiceOver/TalkBack, extensive focus/keyboard testing and real production PWA offline behavior also remain to be checked. See `VALIDATION.md`, `MEDICAL_SOURCE_REVIEW.md`, `CLINICIAN_REVIEW_NOTE_PCOD.md` and `DEVICE_CHECKLIST.md`.

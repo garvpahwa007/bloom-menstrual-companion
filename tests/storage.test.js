@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { webcrypto } from 'node:crypto';
 import { createDemoData } from '../src/data/demo.js';
 import CONFIG from '../src/config.js';
-import { STORAGE_KEY, disablePIN, readEnvelope, saveState, enablePIN, unlockPIN, validateState, exportJSON, exportCSV, importText, deleteEverything } from '../src/lib/storage.js';
+import { STORAGE_KEY, disablePIN, readEnvelope, saveState, enablePIN, unlockPIN, validateState, exportJSON, exportCSV, exportEncryptedBackup, importEncryptedBackup, importText, deleteEverything } from '../src/lib/storage.js';
 
 function memoryStorage() {
   const values = new Map();
@@ -144,6 +144,42 @@ test('CSV backup is lossless for commas, newlines, quotes, Unicode, and metadata
   assert.deepEqual(importText(`\uFEFF${backup}`), state);
 });
 
+test('encrypted backup round-trips complete Unicode/private state without exposing plaintext and uses fresh randomness', async () => {
+  const state = sample();
+  state.logs['2026-10-22'].symptoms = ['cramps', 'headache'];
+  state.logs['2026-10-22'].symptomIntensity = { cramps: 1, headache: 3 };
+  const password = 'a-long and unique backup phrase!';
+  const firstText = await exportEncryptedBackup(state, password);
+  const secondText = await exportEncryptedBackup(state, password);
+  const first = JSON.parse(firstText); const second = JSON.parse(secondText);
+  assert.equal(first.format, 'bloom-encrypted-backup');
+  assert.equal(first.version, 1);
+  assert.equal(first.cipher, 'AES-GCM-256');
+  assert.equal(first.kdf, 'PBKDF2-SHA256');
+  assert.equal(first.iterations, CONFIG.pbkdf2Iterations);
+  assert.equal(atob(first.salt).length, CONFIG.encryptionSaltBytes);
+  assert.equal(atob(first.iv).length, CONFIG.encryptionIvBytes);
+  assert.notEqual(first.salt, second.salt);
+  assert.notEqual(first.iv, second.iv);
+  assert.equal(firstText.includes('PRIVATE_NOTE_MARKER'), false);
+  assert.equal(firstText.includes('trackedSymptoms'), false);
+  assert.equal(JSON.stringify(await importEncryptedBackup(firstText, password)), JSON.stringify(state));
+});
+
+test('encrypted backup wrong passphrase and damaged or extreme wrapper inputs never touch local diary storage', async () => {
+  const state = sample(); await saveState(state);
+  const original = localStorage.getItem(STORAGE_KEY);
+  const text = await exportEncryptedBackup(state, 'another unique backup passphrase');
+  await assert.rejects(importEncryptedBackup(text, 'incorrect unique phrase'), { message: 'backupPassphraseWrong' });
+  const wrapper = JSON.parse(text); wrapper.ciphertext = `${wrapper.ciphertext.slice(0, -4)}AAAA`;
+  await assert.rejects(importEncryptedBackup(JSON.stringify(wrapper), 'another unique backup passphrase'));
+  const unsupported = JSON.parse(text); unsupported.iterations = 999999999;
+  await assert.rejects(importEncryptedBackup(JSON.stringify(unsupported), 'another unique backup passphrase'), { message: 'backupUnsupported' });
+  for (const invalid of ['{', JSON.stringify({ format: 'bloom-encrypted-backup', version: 7 })]) await assert.rejects(importEncryptedBackup(invalid, 'another unique backup passphrase'));
+  await assert.rejects(exportEncryptedBackup(state, 'short'));
+  assert.equal(localStorage.getItem(STORAGE_KEY), original);
+});
+
 test('invalid backup formats, versions, dates, and required fields are rejected', () => {
   const state = sample();
   const invalid = [
@@ -178,8 +214,8 @@ test('delete waits for pending saves and clears localStorage and sessionStorage 
   assert.equal(readEnvelope(), null);
 });
 
-test('delete also removes every named cache and IndexedDB database when APIs are available', async () => {
-  const cached = new Set(['saheli-v1', 'old-cache']);
+test('delete removes Bloom-owned caches and IndexedDB databases without deleting unrelated origin caches', async () => {
+  const cached = new Set(['bloom-app-shell-old', 'saheli-v1', 'other-app-cache']);
   const databases = new Set(['saheli', 'legacy']);
   globalThis.caches = {
     keys: async () => [...cached],
@@ -195,7 +231,7 @@ test('delete also removes every named cache and IndexedDB database when APIs are
   };
   await saveState(sample());
   await deleteEverything();
-  assert.equal(cached.size, 0);
+  assert.deepEqual([...cached], ['saheli-v1', 'other-app-cache']);
   assert.equal(databases.size, 0);
   assert.equal(localStorage.length, 0);
 });

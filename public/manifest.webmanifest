@@ -1,0 +1,33 @@
+{
+  "id": "/",
+  "name": "Bloom · Menstrual Health Companion",
+  "short_name": "Bloom",
+  "description": "A private menstrual health companion in English and Hindi.",
+  "lang": "en",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "theme_color": "#25364f",
+  "background_color": "#f4f1e7",
+  "icons": [
+    {
+      "src": "/bloom-app-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/bloom-app-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/bloom-app-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

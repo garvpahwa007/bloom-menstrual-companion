@@ -339,13 +339,52 @@ h1, h2, h3, .page-heading h1, .tracking-page-heading h1,
   .demo-data-pill { font-size: .5rem; padding-inline: 5px; }
   .header-actions .language-button { width: 34px; min-width: 34px; }
   .ask-shortcut { width: 36px; }
-  .tracking-hero { grid-template-columns: minmax(0, 1fr) 96px; padding-inline: .9rem; }
-  .tracking-cycle-orbit { width: 94px; height: 94px; }
-  .tracking-orbit-center { width: 68px; height: 68px; }
+  .tracking-hero { grid-template-columns: minmax(0, 1fr) 58px; gap: .35rem .2rem; padding-inline: .7rem; }
+  .tracking-cycle-orbit { width: 56px; height: 56px; }
+  .tracking-orbit-center { width: 50px; height: 50px; }
   .mobile-bottom { padding-inline: 4px; }
   .mobile-bottom .nav-item, .mobile-bottom .nav-item:nth-child(3) { font-size: .62rem; }
 }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; }
+}
+
+.tracking-cycle-logo { display: block; width: 56px; height: 82px; object-fit: contain; }
+.tracking-hero-caveat { grid-column: 1 / -1; margin: -.65rem 0 1rem; color: #fff; font-size: .9rem; line-height: 1.5; }
+.today-collapsible { min-width: 0; border: 1px solid var(--line); border-radius: 1rem; background: var(--surface, #fff); overflow: clip; }
+.today-collapsible > summary { display: flex; align-items: center; justify-content: space-between; gap: 1rem; min-height: 56px; padding: .8rem 1rem; color: var(--ink); font-weight: 650; cursor: pointer; list-style: none; }
+.today-collapsible > summary::-webkit-details-marker { display: none; }
+.today-collapsible > summary:focus-visible { outline: 3px solid var(--focus, #2b5f89); outline-offset: -3px; }
+.today-collapsible > summary > svg { flex: 0 0 auto; color: var(--muted); transition: transform .18s ease; }
+.today-collapsible[open] > summary > svg { transform: rotate(180deg); }
+.today-disclosure-body { display: grid; gap: 1rem; padding: 0 1rem 1rem; }
+.today-disclosure-body > .tracking-dashboard-grid { margin: 0; }
+.today-disclosure-body .tracking-stats { margin: 0; }
+.today-disclosure-body .tracking-fertility { margin: 0; }
+
+@media (max-width: 760px) {
+  .tracking-hero { grid-template-columns: minmax(0, 1fr) 70px; gap: .4rem .35rem; padding: .9rem .8rem 0; }
+  .tracking-hero-label { gap: .35rem; font-size: .61rem; letter-spacing: .075em; }
+  .tracking-hero h2 { margin: .45rem 0 .35rem; font-size: 1.27rem; line-height: 1.18; }
+  .tracking-hero-copy > p { font-size: .85rem; line-height: 1.4; }
+  .tracking-hero-button { min-height: 44px; margin-top: .7rem; padding: .6rem .8rem; font-size: .88rem; }
+  .tracking-cycle-orbit { width: 68px; height: 68px; }
+  .tracking-orbit-ring { display: none; }
+  .tracking-orbit-center { width: 60px; height: 60px; border: 0; background: transparent; }
+  .tracking-orbit-small { display: none; }
+  .tracking-hero-estimate { padding: .55rem 0 .6rem; gap: .4rem; }
+  .tracking-hero-estimate > div { display: grid; gap: .1rem; }
+  .tracking-hero-estimate > div > span { font-size: .86rem; }
+  .tracking-hero-estimate strong { font-size: .91rem; }
+  .tracking-hero-estimate .tracking-irregular-badge { margin-left: auto; padding: .3rem .45rem; font-size: .79rem; }
+  .tracking-hero-caveat { margin: -.2rem 0 .65rem; font-size: .76rem; }
+  .tracking-cycle-logo { width: 32px; height: 48px; }
+  .today-collapsible > summary { min-height: 50px; padding: .65rem .85rem; }
+  .today-disclosure-body { gap: .75rem; padding: 0 .8rem .8rem; }
+}
+
+@media (max-width: 360px) {
+  .tracking-cycle-logo { width: 28px; height: 42px; }
+  .tracking-hero-caveat { font-size: .78rem; }
 }

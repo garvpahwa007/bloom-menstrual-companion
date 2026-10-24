@@ -1,6 +1,7 @@
 import CONFIG from '../config.js';
 import { todayISO } from './dates.js';
 export const STORAGE_KEY = 'saheli.v1';
+export const BLOOM_CACHE_PREFIX = 'bloom-app-shell-';
 const ITERATIONS = CONFIG.pbkdf2Iterations;
 const encoder = new TextEncoder();
 const decoder = new TextDecoder();
@@ -125,7 +126,7 @@ export async function deleteEverything() {
   await pendingWrite.catch(() => {});
   localStorage.clear();
   sessionStorage.clear();
-  if (globalThis.caches) await Promise.all((await caches.keys()).map(key => caches.delete(key)));
+  if (globalThis.caches) await Promise.all((await caches.keys()).filter(key => key.startsWith(BLOOM_CACHE_PREFIX)).map(key => caches.delete(key)));
   if (globalThis.indexedDB?.databases) {
     const databases = await indexedDB.databases();
     await Promise.all(databases.filter(db => db.name).map(db => new Promise((resolve, reject) => {
@@ -144,6 +145,72 @@ export function exportCSV(state) {
   const rows = [['record_type', 'date', 'flow', 'pain', 'mood', 'symptoms', 'data_json'], ['metadata', '', '', '', '', '', JSON.stringify(meta)]];
   for (const [date, log] of Object.entries(logs).sort(([a], [b]) => a.localeCompare(b))) rows.push(['day', date, log.flow, log.pain, log.mood, log.symptoms.join(';'), JSON.stringify(log)]);
   return rows.map(row => row.map(quoteCSV).join(',')).join('\r\n');
+}
+
+const BACKUP_FORMAT = 'bloom-encrypted-backup';
+const BACKUP_MIN_ITERATIONS = 100000;
+const BACKUP_MAX_ITERATIONS = 500000;
+const BACKUP_FIELDS = ['format', 'version', 'cipher', 'kdf', 'iterations', 'salt', 'iv', 'ciphertext'];
+const validBase64 = text => typeof text === 'string' && text.length > 0 && text.length % 4 === 0 && /^[A-Za-z0-9+/]+={0,2}$/.test(text);
+function backupCryptoAvailable() {
+  if (!globalThis.crypto?.subtle || !globalThis.crypto?.getRandomValues) throw new Error('backupCryptoUnavailable');
+}
+async function deriveBackupKey(passphrase, salt, iterations) {
+  const material = await crypto.subtle.importKey('raw', encoder.encode(passphrase), 'PBKDF2', false, ['deriveKey']);
+  return crypto.subtle.deriveKey({ name: 'PBKDF2', salt, iterations, hash: 'SHA-256' }, material, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']);
+}
+function validateBackupPassphrase(passphrase) {
+  if (typeof passphrase !== 'string' || Array.from(passphrase).length < 12 || passphrase.length > 1024) throw new Error('backupPassphraseFormat');
+}
+
+export async function exportEncryptedBackup(state, passphrase) {
+  backupCryptoAvailable();
+  validateBackupPassphrase(passphrase);
+  const validState = validateState(state);
+  const plaintext = encoder.encode(JSON.stringify(validState));
+  if (plaintext.length > CONFIG.maximumImportBytes) throw new Error('invalidImport');
+  const salt = crypto.getRandomValues(new Uint8Array(CONFIG.encryptionSaltBytes));
+  const iv = crypto.getRandomValues(new Uint8Array(CONFIG.encryptionIvBytes));
+  const key = await deriveBackupKey(passphrase, salt, ITERATIONS);
+  const ciphertext = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, plaintext);
+  const wrapper = {
+    format: BACKUP_FORMAT,
+    version: 1,
+    cipher: 'AES-GCM-256',
+    kdf: 'PBKDF2-SHA256',
+    iterations: ITERATIONS,
+    salt: to64(salt),
+    iv: to64(iv),
+    ciphertext: to64(ciphertext),
+  };
+  const text = JSON.stringify(wrapper, null, 2);
+  if (encoder.encode(text).length > CONFIG.maximumEncryptedBackupBytes) throw new Error('invalidImport');
+  return text;
+}
+
+export function isEncryptedBackupText(text) {
+  if (typeof text !== 'string') return false;
+  try { return JSON.parse(text)?.format === BACKUP_FORMAT; } catch { return false; }
+}
+
+export async function importEncryptedBackup(text, passphrase) {
+  backupCryptoAvailable();
+  validateBackupPassphrase(passphrase);
+  if (typeof text !== 'string' || encoder.encode(text).length > CONFIG.maximumEncryptedBackupBytes) throw new Error('invalidImport');
+  let wrapper;
+  try { wrapper = JSON.parse(text); } catch { throw new Error('invalidEncryptedBackup'); }
+  if (!wrapper || wrapper.format !== BACKUP_FORMAT) throw new Error('invalidEncryptedBackup');
+  if (wrapper.version !== 1 || wrapper.cipher !== 'AES-GCM-256' || wrapper.kdf !== 'PBKDF2-SHA256' || !Number.isInteger(wrapper.iterations) || wrapper.iterations < BACKUP_MIN_ITERATIONS || wrapper.iterations > BACKUP_MAX_ITERATIONS || Object.keys(wrapper).sort().join('|') !== [...BACKUP_FIELDS].sort().join('|')) throw new Error('backupUnsupported');
+  if (![wrapper.salt, wrapper.iv, wrapper.ciphertext].every(validBase64)) throw new Error('invalidEncryptedBackup');
+  let salt, iv, ciphertext;
+  try { salt = from64(wrapper.salt); iv = from64(wrapper.iv); ciphertext = from64(wrapper.ciphertext); } catch { throw new Error('invalidEncryptedBackup'); }
+  if (salt.length !== CONFIG.encryptionSaltBytes || iv.length !== CONFIG.encryptionIvBytes || ciphertext.length < 16 || ciphertext.length > CONFIG.maximumImportBytes + 16) throw new Error('invalidEncryptedBackup');
+  const key = await deriveBackupKey(passphrase, salt, wrapper.iterations);
+  let plaintext;
+  try { plaintext = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, ciphertext); } catch { throw new Error('backupPassphraseWrong'); }
+  let decoded;
+  try { decoded = JSON.parse(decoder.decode(plaintext)); } catch { throw new Error('invalidEncryptedBackup'); }
+  return validateState(decoded);
 }
 
 function parseCSV(text) {
