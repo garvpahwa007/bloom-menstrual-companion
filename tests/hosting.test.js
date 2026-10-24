@@ -5,9 +5,11 @@ import fs from 'node:fs';
 test('production HTML policy blocks third-party requests and code', () => {
  const html=fs.readFileSync(new URL('../index.html',import.meta.url),'utf8');
  assert.match(html,/Content-Security-Policy/);
+ assert.match(html,/<link rel="canonical" href="https:\/\/bloom-period-companion\.vercel\.app\/"\s*\/>/);
+ assert.match(html,/<meta property="og:url" content="https:\/\/bloom-period-companion\.vercel\.app\/"\s*\/>/);
  for(const directive of ["default-src 'self'","script-src 'self'","font-src 'self'","connect-src 'self'","object-src 'none'"]) assert.ok(html.includes(directive));
  assert.doesNotMatch(html,/<(?:script|img)[^>]+src=["']https?:\/\//);
- assert.doesNotMatch(html,/<link[^>]+href=["']https?:\/\//);
+ assert.equal((html.match(/<link[^>]+href=["']https?:\/\//g)||[]).length,1,'only the absolute canonical link may use an external origin');
 });
 
 test('static hosting includes SPA refresh rewrites and no health API requirement', () => {
