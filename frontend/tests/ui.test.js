@@ -88,6 +88,8 @@ async function mount() {
   const container = document.createElement('div'); container.id = 'synthetic-root'; document.body.append(container);
   root = createRoot(container);
   await act(async () => { root.render(React.createElement(BrowserRouter, null, React.createElement(App))); });
+  const resume = document.querySelector('.welcome-returning-actions .button.primary');
+  if (resume) await act(async () => resume.click());
 }
 async function remount() {
   await act(async () => { root.unmount(); }); root = null; document.body.innerHTML = '';

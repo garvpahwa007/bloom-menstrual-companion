@@ -67,6 +67,8 @@ async function mount(path, state, { locked = false, language = 'en' } = {}) {
   reactErrors = []; originalConsoleError = console.error;
   console.error = (...args) => reactErrors.push(args.map(String).join(' '));
   await act(async () => { root.render(React.createElement(BrowserRouter, null, React.createElement(App))); });
+  const resume = document.querySelector('.welcome-returning-actions .button.primary');
+  if (resume) await act(async () => resume.click());
   if ((!state || locked) && language === 'hi') {
     const languageButton = document.querySelector('.language-button');
     assert.ok(languageButton, 'The welcome/locked screen must expose a language control.');

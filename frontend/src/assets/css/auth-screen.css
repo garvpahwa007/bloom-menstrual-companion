@@ -503,3 +503,44 @@
     gap: 5px;
   }
 }
+
+.welcome-returning .welcome-copy {
+  animation-delay: 0ms;
+}
+
+.welcome-returning-actions {
+  margin-top: 26px;
+}
+
+.welcome-returning-actions .button {
+  min-height: 54px;
+}
+
+.welcome-returning-actions .button.secondary {
+  width: fit-content;
+  min-height: 48px;
+  padding-inline: 18px;
+}
+
+/* Reduced-motion mode should suppress large movement, not every useful UI transition. */
+@media (prefers-reduced-motion: reduce) {
+  button,
+  a,
+  input,
+  select,
+  textarea,
+  [role='button'],
+  .nav-item,
+  .card,
+  .toast {
+    transition-property: color, background-color, border-color, opacity, box-shadow !important;
+    transition-duration: 180ms !important;
+    transition-timing-function: ease !important;
+  }
+}
+
+@media (max-width: 520px) {
+  .welcome-returning-actions .button.secondary {
+    width: 100%;
+  }
+}

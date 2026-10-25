@@ -107,6 +107,27 @@ test('full App: fresh Welcome opens Cloud only by choice and confirmation persis
   assert.equal(sessionStorage.length, 0);
 });
 
+test('full App: returning user can reopen the start screen and continue without deleting the saved diary', async () => {
+  const stored = JSON.stringify({ version: 1, encrypted: false, data: diary });
+  localStorage.setItem(STORAGE_KEY, stored);
+  await mount('/');
+  assert.ok(button(en['welcome.resume']));
+  assert.ok(button(en['welcome.cloud']));
+  assert.equal(localStorage.getItem(STORAGE_KEY), stored);
+  await click(en['welcome.resume']);
+  await waitFor(() => !!document.querySelector('.app-shell'));
+  assert.equal(localStorage.getItem(STORAGE_KEY), stored, 'Continuing must retain every saved diary entry.');
+});
+
+test('full App: PIN-protected diary keeps its unlock screen ahead of the returning-user start screen', async () => {
+  await enablePIN(diary, '4826');
+  const stored = localStorage.getItem(STORAGE_KEY);
+  await mount('/');
+  assert.ok(button(en['lock.unlock']));
+  assert.equal(button(en['welcome.resume']), undefined);
+  assert.equal(localStorage.getItem(STORAGE_KEY), stored);
+});
+
 test('full App: cancelling a fresh-device restore keeps local storage empty', async () => {
   await mount('/cloud');
   await fill(copy.restorePassphrase, 'synthetic-restore-passphrase');
