@@ -74,7 +74,7 @@ Each screen has a feature folder under `frontend/src/pages/`. A `.page.jsx` file
 | `pages/guidance/` | Care cards and evidence-based rule evaluation. |
 | `pages/visit/` | Visit screen, summary aggregation and PDF generation. |
 | `pages/learn/` | Lesson catalogue, lesson detail and instructional diagrams. |
-| `pages/ask/` | Local question screen and sourced answer matching. |
+| `pages/ask/` | Offline chat screen, canonical sourced FAQ matching, local conversation rules and optional diary summary. |
 | `pages/reminders/` | Reminder settings, weekday control and scheduling calculations. |
 | `pages/pregnancy/` | Confirmed pregnancy mode and sourced weekly content display. |
 | `pages/privacy/` | Export, restore, encryption and deletion controls. |

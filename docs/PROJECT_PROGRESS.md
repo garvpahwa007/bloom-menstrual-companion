@@ -1,5 +1,7 @@
 # Bloom current progress
 
+The user chose a fully offline chatbot in English, Hindi and Tamil. The Ask upgrade keeps questions out of servers, account storage and backups; see [OFFLINE_CHATBOT.md](OFFLINE_CHATBOT.md) for its features, tests and limits.
+
 25 October 2026 backend extension: see [BACKEND_STATUS.md](BACKEND_STATUS.md) for the current checklist and actual validation. The dated frontend history below remains a record of the earlier build. Accounts/server storage are an optional, user-authorized change to the original no-server rule; the existing local essentials remain account-free.
 
 

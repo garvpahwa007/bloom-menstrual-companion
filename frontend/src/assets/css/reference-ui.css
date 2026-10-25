@@ -388,3 +388,13 @@ h1, h2, h3, .page-heading h1, .tracking-page-heading h1,
   .tracking-cycle-logo { width: 28px; height: 42px; }
   .tracking-hero-caveat { font-size: .78rem; }
 }
+
+/* Offline conversation controls share the Ask page's readable mobile layout. */
+.chat-privacy-controls { padding: 16px 0; border-block: 1px solid var(--line); margin-block: 18px; }
+.chat-privacy-controls p { margin-block: 0 12px; }
+.chat-diary-toggle { display: flex; align-items: center; gap: 12px; min-height: 48px; cursor: pointer; }
+.chat-diary-toggle input { width: 22px; height: 22px; flex-shrink: 0; accent-color: var(--plum); }
+.chat-answer-text { white-space: pre-line; overflow-wrap: anywhere; }
+.ask-followups { display: grid; gap: 10px; margin-block: 18px; }
+.ask-followups .suggestion { width: 100%; min-height: 48px; text-align: start; white-space: normal; overflow-wrap: anywhere; }
+.chat-privacy-controls .button { max-width: 100%; white-space: normal; }

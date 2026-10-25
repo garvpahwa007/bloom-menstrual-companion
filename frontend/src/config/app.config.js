@@ -4,6 +4,7 @@
  */
 export const CONFIG = Object.freeze({
   version: 1,
+  maximumChatTurns: 20,
   recentCycleLimit: 6,
   minimumCompleteCycles: 3,
   minimumPredictionMarginDays: 2,

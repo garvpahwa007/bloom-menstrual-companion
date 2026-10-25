@@ -20,6 +20,10 @@ export default defineConfig({
   },
   build: {
     outDir: 'dist', sourcemap: false,
-    rollupOptions: { output: { manualChunks: id => id.includes('node_modules') ? 'vendor' : undefined } },
+    rollupOptions: { output: { manualChunks: id => {
+      if (id.includes('node_modules')) return 'vendor';
+      if (id.replaceAll('\\', '/').includes('/src/content/')) return 'health-content';
+      return undefined;
+    } } },
   },
 });
