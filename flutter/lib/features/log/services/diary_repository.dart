@@ -8,6 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../common/bloom_config.dart';
 import '../../../common/date_utils.dart';
 import '../models/day_log.dart';
+import '../models/mood_catalog.dart';
 import 'demo_data.dart';
 
 /// Local-first diary storage. Only encrypted backup envelopes may leave the device.
@@ -670,8 +671,7 @@ class DiaryRepository extends ChangeNotifier {
       if (record['flow'] != null &&
           !['spotting', 'light', 'medium', 'heavy'].contains(record['flow']))
         throw const FormatException('invalidImport');
-      if (record['mood'] != null &&
-          !['veryLow', 'low', 'okay', 'good', 'great'].contains(record['mood']))
+      if (record['mood'] != null && !validMoodIds.contains(record['mood']))
         throw const FormatException('invalidImport');
       if (record['energy'] != null &&
           !['low', 'okay', 'high'].contains(record['energy']))

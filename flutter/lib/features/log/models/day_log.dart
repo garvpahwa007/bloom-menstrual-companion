@@ -10,7 +10,7 @@ class DayLog {
     this.painUnrelieved = false,
     this.symptoms = const <String>[],
     this.symptomIntensity = const <String, int>{},
-    this.mood = 'okay',
+    this.mood = 'fine',
     this.energy = 'okay',
     this.sleep = 8,
     this.medicines = '',
@@ -138,7 +138,7 @@ class DayLog {
       symptomIntensity: (json['symptomIntensity'] as Map? ?? const {}).map(
         (key, value) => MapEntry(key.toString(), (value as num).round()),
       ),
-      mood: json['mood'] as String? ?? 'okay',
+      mood: json['mood'] as String? ?? 'fine',
       energy: json['energy'] as String? ?? 'okay',
       sleep: (json['sleep'] as num?)?.toDouble() ?? 8,
       medicines: json['medicines'] as String? ?? '',

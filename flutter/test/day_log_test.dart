@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:bloom_companion/features/log/models/day_log.dart';
+import 'package:bloom_companion/features/log/models/mood_catalog.dart';
 
 void main() {
   group('DayLog', () {
@@ -26,6 +27,17 @@ void main() {
       expect(restored.energy, 'high');
       expect(restored.sleep, 7.5);
       expect(restored.note, 'A note kept locally');
+    });
+
+    test('new mood descriptors round-trip without dropping legacy choices', () {
+      for (final mood in moodIds) {
+        final original = DayLog(date: DateTime(2026, 10, 25), mood: mood);
+        final restored = DayLog.fromJson(original.toJson());
+        expect(restored.mood, mood);
+        expect(validMoodIds.contains(restored.mood), isTrue);
+      }
+      expect(validMoodIds.contains('veryLow'), isTrue);
+      expect(validMoodIds.contains('great'), isTrue);
     });
 
     test('copyWith changes selected values and preserves the rest', () {

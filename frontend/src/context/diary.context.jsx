@@ -4,6 +4,7 @@ import { createDemoData } from '../data/demo.js';
 import { analyzeCycles } from '../pages/cycle/cycle.service.js';
 import { evaluateGuidance } from '../pages/guidance/guidance.service.js';
 import { todayISO } from '../utilities/date.helper.js';
+import { subscribeToLocalDay } from '../utilities/local-day-ticker.js';
 import { deleteEverything, downloadFile, disablePIN, enablePIN, exportCSV, exportJSON, exportEncryptedBackup, importEncryptedBackup, isEncryptedBackupText, importText, readEnvelope, saveState, unlockPIN, validateState } from '../services/storage.service.js';
 import { translator } from '../i18n/index.js';
 import CONFIG from '../config/app.config.js';
@@ -47,6 +48,8 @@ export function DiaryProvider({
   const [confirmation, setConfirmation] = useState(null);
   const queue = useRef(Promise.resolve());
   const fired = useRef(new Set());
+  const [today, setToday] = useState(() => todayISO());
+  useEffect(() => subscribeToLocalDay(setToday), []);
   useEffect(() => {
     const sync = event => {
       if (event.key === 'saheli.v1' || event.key === null) window.location.reload();
@@ -60,11 +63,13 @@ export function DiaryProvider({
   const t = useMemo(() => translator(lang), [lang]);
   const analysis = useMemo(() => state ? analyzeCycles(state.logs, {
     ...state.profile,
+    today,
     trackedSymptoms: state.settings.trackedSymptoms
-  }) : null, [state]);
+  }) : null, [state, today]);
   const cards = useMemo(() => state ? evaluateGuidance(state.logs, state.profile, {
+    today,
     dismissals: state.dismissals
-  }) : [], [state]);
+  }) : [], [state, today]);
   useEffect(() => {
     document.documentElement.lang = lang;
     document.documentElement.dataset.size = state?.settings.textSize || 'normal';
@@ -400,6 +405,7 @@ export function DiaryProvider({
       }
     })))) throw Error('save');
     const nextCards = evaluateGuidance(stateRef.current.logs, stateRef.current.profile, {
+      today,
       dismissals: stateRef.current.dismissals
     });
     if (nextCards.some(card => card.severity !== 'consult' && card.dates.includes(date))) navigate('/guidance');
@@ -407,6 +413,7 @@ export function DiaryProvider({
   return <DiaryContext.Provider value={{
     state,
     analysis,
+    today,
     cards,
     t,
     lang,

@@ -546,3 +546,22 @@
 .tracking-chart-label > strong { color: #25364f; }
 .tracking-calendar-day.logged { color: #532a2b; }
 .tracking-gap-card { background: #efe3d4; border-color: #d7b995; }
+
+
+/* Mood descriptors: readable card choices on desktop and compact three-column cards on phones. */
+.tracking-mood-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .65rem; }
+.tracking-mood-grid .tracking-choice { min-height: 96px; justify-content: center; gap: .42rem; padding: .65rem .4rem; border-color: #e8cdd6; background: #fff9fb; text-align: center; white-space: normal; line-height: 1.25; }
+.tracking-mood-grid .tracking-choice > svg:first-child { color: #a26180; }
+.tracking-mood-grid .tracking-choice span { max-width: 100%; overflow-wrap: anywhere; }
+.tracking-mood-grid .tracking-choice.selected { border-color: #ad6e8b; background: #f8e7ed; color: #512c43; box-shadow: inset 0 0 0 1px #ad6e8b; }
+.tracking-legacy-moods { margin-top: .85rem; padding-top: .75rem; border-top: 1px solid var(--line); }
+.tracking-legacy-moods > summary { width: max-content; max-width: 100%; cursor: pointer; color: var(--muted); font-size: .9rem; font-weight: 600; }
+.tracking-legacy-moods[open] > summary { margin-bottom: .65rem; }
+@media (max-width: 760px) {
+  .tracking-mood-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .5rem; }
+  .tracking-mood-grid .tracking-choice { min-height: 92px; padding: .55rem .35rem; font-size: .9rem; }
+}
+@media (prefers-contrast: more) {
+  .tracking-mood-grid .tracking-choice { border-color: #746477; background: #fff; }
+  .tracking-mood-grid .tracking-choice.selected { border-color: #3f2452; background: #f4eaf2; }
+}

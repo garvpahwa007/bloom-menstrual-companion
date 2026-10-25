@@ -34,6 +34,7 @@ class _HomeShellState extends State<HomeShell> with WidgetsBindingObserver {
   static const _primaryRoutes = ['today', 'log', 'calendar', 'insights'];
   String _route = 'today';
   DateTime _selectedDate = DateUtils.dateOnly(DateTime.now());
+  DateTime _currentLocalDay = DateUtils.dateOnly(DateTime.now());
   int _logRevision = 0;
   String? _initialSymptom;
   Timer? _reminderTimer;
@@ -51,7 +52,10 @@ class _HomeShellState extends State<HomeShell> with WidgetsBindingObserver {
     WidgetsBinding.instance.addObserver(this);
     _reminderTimer = Timer.periodic(
       const Duration(milliseconds: 30000),
-      (_) => _checkReminders(),
+      (_) {
+        _refreshLocalDay();
+        _checkReminders();
+      },
     );
     WidgetsBinding.instance.addPostFrameCallback((_) => _checkReminders());
   }
@@ -66,7 +70,16 @@ class _HomeShellState extends State<HomeShell> with WidgetsBindingObserver {
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) _checkReminders();
+    if (state == AppLifecycleState.resumed) {
+      _refreshLocalDay();
+      _checkReminders();
+    }
+  }
+
+  void _refreshLocalDay() {
+    final today = DateUtils.dateOnly(DateTime.now());
+    if (!mounted || today == _currentLocalDay) return;
+    setState(() => _currentLocalDay = today);
   }
 
   void _openLog(DateTime date) {

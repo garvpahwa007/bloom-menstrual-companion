@@ -5,6 +5,7 @@ import '../../../../common/bloom_config.dart';
 import '../../../../common/custom_theme.dart';
 import '../../../../common/feature_scaffold.dart';
 import '../../models/day_log.dart';
+import '../../models/mood_catalog.dart';
 import '../../services/diary_repository.dart';
 
 class LogPage extends StatefulWidget {
@@ -378,19 +379,40 @@ class _LogPageState extends State<LogPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Wrap(
-                spacing: 6,
-                runSpacing: 7,
-                children: ['veryLow', 'low', 'okay', 'good', 'great']
-                    .map(
-                      (mood) => ChoiceChip(
+              GridView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: moodIds.length,
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 3,
+                  crossAxisSpacing: 8,
+                  mainAxisSpacing: 8,
+                  childAspectRatio: 1.08,
+                ),
+                itemBuilder: (context, index) => _moodTile(moodIds[index]),
+              ),
+              ExpansionTile(
+                key: ValueKey(
+                  'legacy-moods-${legacyMoodIds.contains(_draft.mood)}',
+                ),
+                tilePadding: EdgeInsets.zero,
+                initiallyExpanded: legacyMoodIds.contains(_draft.mood),
+                title: Text(_catalog.t('tracking.moodLegacyScale', _lang)),
+                children: [
+                  Wrap(
+                    spacing: 6,
+                    runSpacing: 7,
+                    children: legacyMoodIds.map((mood) {
+                      return ChoiceChip(
                         avatar: Icon(_moodIcon(mood), size: 18),
                         label: Text(_catalog.t('tracking.mood.$mood', _lang)),
                         selected: _draft.mood == mood,
-                        onSelected: (_) => _update(_draft.copyWith(mood: mood)),
-                      ),
-                    )
-                    .toList(),
+                        onSelected: (_) =>
+                            _update(_draft.copyWith(mood: mood)),
+                      );
+                    }).toList(),
+                  ),
+                ],
               ),
               const SizedBox(height: 12),
               Text(
@@ -715,15 +737,74 @@ class _LogPageState extends State<LogPage> {
     }
   }
 
-  String _normalizeMood(String mood) => switch (mood.toLowerCase()) {
-    'very low' || 'verylow' => 'veryLow',
-    'great' => 'great',
-    'good' => 'good',
-    'low' => 'low',
-    _ => 'okay',
-  };
+  String _normalizeMood(String mood) {
+    if (validMoodIds.contains(mood)) return mood;
+    return switch (mood.toLowerCase()) {
+      'very low' || 'verylow' => 'veryLow',
+      'great' => 'great',
+      'good' => 'good',
+      'low' => 'low',
+      _ => 'fine',
+    };
+  }
+
+  Widget _moodTile(String mood) {
+    final selected = _draft.mood == mood;
+    final label = _catalog.t('tracking.mood.$mood', _lang);
+    return Semantics(
+      button: true,
+      selected: selected,
+      label: label,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(12),
+        onTap: () => _update(_draft.copyWith(mood: mood)),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 160),
+          padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 7),
+          decoration: BoxDecoration(
+            color: selected ? const Color(0xFFF5E6EE) : const Color(0xFFFFFAFC),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: selected ? BloomTheme.plumDark : const Color(0xFFE8CDD6),
+              width: selected ? 1.7 : 1,
+            ),
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(_moodIcon(mood), color: BloomTheme.plumDark, size: 24),
+              const SizedBox(height: 5),
+              Text(
+                label,
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                  fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 
   IconData _moodIcon(String value) => switch (value) {
+    'moodSwings' => Icons.cloud_queue,
+    'notInControl' => Icons.sync_problem,
+    'fine' => Icons.sentiment_neutral,
+    'happy' => Icons.sentiment_satisfied,
+    'sad' => Icons.sentiment_dissatisfied,
+    'sensitive' => Icons.air,
+    'angry' => Icons.bolt,
+    'confident' => Icons.verified_user,
+    'excited' => Icons.auto_awesome,
+    'irritable' => Icons.flash_on,
+    'anxious' => Icons.waves,
+    'insecure' => Icons.shield_outlined,
+    'grateful' => Icons.favorite_border,
+    'indifferent' => Icons.remove_circle_outline,
     'veryLow' => Icons.sentiment_very_dissatisfied_outlined,
     'low' => Icons.sentiment_dissatisfied_outlined,
     'good' => Icons.sentiment_satisfied_outlined,

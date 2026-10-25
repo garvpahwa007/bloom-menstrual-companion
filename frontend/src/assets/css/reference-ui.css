@@ -419,3 +419,36 @@ body {
 .ask-followups { display: grid; gap: 10px; margin-block: 18px; }
 .ask-followups .suggestion { width: 100%; min-height: 48px; text-align: start; white-space: normal; overflow-wrap: anywhere; }
 .chat-privacy-controls .button { max-width: 100%; white-space: normal; }
+
+
+/* The Today heart follows a quiet circular path around the mark, including compact layouts. */
+.tracking-cycle-orbit { --tracking-heart-radius: 84px; }
+@media (max-width: 900px) {
+  .tracking-cycle-orbit { --tracking-heart-radius: 40px; }
+}
+@media (max-width: 760px) {
+  .tracking-hero { grid-template-columns: minmax(0, 1fr) 84px; }
+  .tracking-cycle-orbit { width: 82px; height: 82px; --tracking-heart-radius: 31px; }
+  .tracking-orbit-ring { display: block; opacity: .45; }
+  .tracking-orbit-small { display: grid; width: 22px; height: 22px; }
+  .tracking-orbit-small > svg { width: 13px; height: 13px; }
+}
+@media (max-width: 360px) {
+  .tracking-hero { grid-template-columns: minmax(0, 1fr) 70px; }
+  .tracking-cycle-orbit { width: 68px; height: 68px; --tracking-heart-radius: 23px; }
+  .tracking-orbit-small { width: 20px; height: 20px; }
+  .tracking-orbit-small > svg { width: 12px; height: 12px; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes tracking-heart-orbit {
+    from { transform: translate(-50%, -50%) rotate(0deg) translateX(var(--tracking-heart-radius)) rotate(0deg); }
+    to { transform: translate(-50%, -50%) rotate(360deg) translateX(var(--tracking-heart-radius)) rotate(-360deg); }
+  }
+  .tracking-orbit-small {
+    z-index: 2;
+    top: 50%;
+    left: 50%;
+    right: auto;
+    animation: tracking-heart-orbit 14s linear infinite;
+  }
+}

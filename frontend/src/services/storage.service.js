@@ -1,5 +1,6 @@
 import CONFIG from '../config/app.config.js';
 import { todayISO } from '../utilities/date.helper.js';
+import { VALID_MOOD_IDS } from '../constants/mood.constant.js';
 export const STORAGE_KEY = 'saheli.v1';
 export const BLOOM_CACHE_PREFIX = 'bloom-app-shell-';
 const ITERATIONS = CONFIG.pbkdf2Iterations;
@@ -105,7 +106,7 @@ export function validateState(input) {
     if ('pain' in log && (!Number.isFinite(log.pain) || log.pain < 0 || log.pain > CONFIG.painScaleMaximum)) invalid();
     if ('sleep' in log && (!Number.isFinite(log.sleep) || log.sleep < 0 || log.sleep > CONFIG.maximumSleepHours)) invalid();
     if ('flow' in log && !['spotting', 'light', 'medium', 'heavy'].includes(log.flow)) invalid();
-    if ('mood' in log && !['veryLow', 'low', 'okay', 'good', 'great'].includes(log.mood)) invalid();
+    if ('mood' in log && !VALID_MOOD_IDS.includes(log.mood)) invalid();
     if ('energy' in log && !['low', 'okay', 'high'].includes(log.energy)) invalid();
   }
   for (const reminder of input.reminders) {

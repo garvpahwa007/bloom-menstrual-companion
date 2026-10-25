@@ -18,6 +18,7 @@ export default function AppRoutes() {
   const {
     state,
     analysis,
+    today,
     t,
     lang,
     updateState,
@@ -39,6 +40,7 @@ export default function AppRoutes() {
   const common = {
     state,
     analysis,
+    today,
     t,
     lang,
     onUpdateState: updateState,

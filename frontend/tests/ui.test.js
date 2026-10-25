@@ -160,6 +160,7 @@ test('React UI: compact Today uses the Bloom mark and keeps essential estimate s
   await startDemo();
   assert.equal(document.querySelector('.tracking-cycle-logo')?.getAttribute('src'), '/bloom-mark.png');
   assert.equal(document.querySelector('.tracking-cycle-orbit')?.getAttribute('aria-hidden'), 'true');
+  assert.equal(document.querySelector('.phase-analysis-card time')?.getAttribute('datetime'), todayISO());
   assert.ok(document.querySelector('.tracking-cycle-orbit .tracking-cycle-logo'));
   assert.ok(bodyText().includes(text('tracking.estimateCaveat')));
   assert.ok(bodyText().includes(text('tracking.nextEstimate')));
@@ -560,6 +561,20 @@ test('React UI: a complete dated log survives reload, opens from Calendar, and e
   await clickButton(text('tracking.saveLog'));
   await waitFor(() => envelope()?.data?.logs?.[date]?.note === editedNote, 'The edited calendar date should save.');
   assert.deepEqual(envelope().data.logs[neighborDate] || null, neighborBefore, 'Editing one date must not overwrite its neighbor.');
+});
+
+test('React UI: new mood descriptors save and survive a diary remount', async () => {
+  await startDemo();
+  const today = todayISO();
+  await navigate('/log');
+  assert.ok(findButton(text('tracking.mood.anxious')), 'The requested mood option should be available.');
+  await clickButton(text('tracking.mood.anxious'));
+  await clickButton(text('tracking.saveLog'));
+  await waitFor(() => envelope()?.data?.logs?.[today]?.mood === 'anxious', 'The new mood choice should save to today.');
+
+  await remount();
+  if (window.location.pathname !== '/log') await navigate('/log');
+  assert.ok(findButton(text('tracking.mood.anxious')).classList.contains('selected'));
 });
 
 test('React UI: regular adult history shows cautious fertile estimates and marks estimated days in the calendar', async () => {
