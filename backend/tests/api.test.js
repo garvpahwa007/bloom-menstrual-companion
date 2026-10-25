@@ -83,6 +83,9 @@ test('Express API against a disposable real MongoDB', { timeout: 180_000 }, asyn
           { username: 'valid_alias', password: 'short' },
           { username: { $ne: null }, password },
           { username: 'valid_alias', password, email: 'not-collected@example.invalid' },
+          { username: 'valid_alias', password, phone: '+910000000000' },
+          { username: 'valid_alias', password, dateOfBirth: '2009-01-01' },
+          { username: 'valid_alias', password, ageGroup: 'under18' },
         ]) {
           const invalid = await anonymous.request('/auth/register', { method: 'POST', body });
           assert.equal(invalid.status, 400, invalid.text);
@@ -234,11 +237,49 @@ test('Express API against a disposable real MongoDB', { timeout: 180_000 }, asyn
         assert.equal((await user.request('/auth/login', { method: 'POST', body: { username: user.username, password } })).status, 401);
       });
 
-      await t.test('expired sessions cannot access a diary', async () => {
+      await t.test('an expired session can sign in again without losing its account or encrypted age group', async () => {
         const user = await account(base);
+        const state = createDemoData('2026-10-25');
+        state.profile.ageGroup = 'under18';
+        const backup = JSON.parse(await exportEncryptedBackup(state, passphrase));
+        const uploaded = await user.request('/diary/backup', { method: 'PUT', body: { backup, expectedRevision: 0 } });
+        assert.equal(uploaded.status, 200);
+        const originalCookie = user.api.cookie;
+        const originalCsrf = user.api.csrf;
+        const originalAccount = await app.locals.models.User.findById(user.id).select('+passwordHash +passwordSalt').lean();
+        const accountCount = await app.locals.models.User.countDocuments();
         await app.locals.models.Session.updateMany({ userId: user.id }, { $set: { expiresAt: new Date(Date.now() - 60_000) } });
         assert.equal((await user.request('/auth/session')).status, 401);
         assert.equal((await user.request('/diary/backup')).status, 401);
+        assert.equal((await user.request('/diary/status')).status, 401);
+        const login = await user.request('/auth/login', { method: 'POST', body: { username: user.username, password } });
+        assert.equal(login.status, 200, login.text);
+        assert.equal(login.json.data.user.id, user.id);
+        assert.equal(login.json.data.user.username, user.username);
+        assert.deepEqual(Object.keys(login.json.data.user).sort(), ['id', 'username']);
+        assert.notEqual(user.api.cookie, originalCookie);
+        assert.notEqual(user.api.csrf, originalCsrf);
+        assert.equal(await app.locals.models.User.countDocuments(), accountCount, 'signing in must not recreate the account');
+        const oldSession = await fetch(`${base}/auth/session`, { headers: { Cookie: originalCookie } });
+        assert.equal(oldSession.status, 401, 'the expired cookie must stay revoked after signing in again');
+        const session = await user.request('/auth/session');
+        assert.equal(session.status, 200);
+        assert.deepEqual(session.json.data.user, login.json.data.user);
+        assert.equal(session.json.data.csrfToken, login.json.data.csrfToken);
+        const restored = await user.request('/diary/backup');
+        assert.equal(restored.status, 200);
+        assert.equal(restored.json.data.revision, 1);
+        assert.deepEqual(restored.json.data.backup, backup);
+        const diary = await importEncryptedBackup(JSON.stringify(restored.json.data.backup), passphrase);
+        assert.deepEqual(diary, state);
+        assert.equal(diary.profile.ageGroup, 'under18');
+        const storedAccount = await app.locals.models.User.findById(user.id).select('+passwordHash +passwordSalt').lean();
+        assert.equal(storedAccount.passwordHash, originalAccount.passwordHash);
+        assert.equal(storedAccount.passwordSalt, originalAccount.passwordSalt);
+        for (const field of ['age', 'ageGroup', 'dateOfBirth', 'dob', 'email', 'phone']) {
+          assert.equal(Object.hasOwn(storedAccount, field), false, `${field} must not be a plaintext account field`);
+          assert.equal(Object.hasOwn(session.json.data.user, field), false);
+        }
       });
 
       await t.test('authentication rate limiting returns a bounded retry response', async () => {

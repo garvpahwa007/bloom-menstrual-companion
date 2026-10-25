@@ -23,12 +23,13 @@ export default function HomeLayout() {
     unlock,
     start,
     restoreFromCloud,
+    registerProfile,
     navigate,
     menuOpen,
     setMenuOpen,
     location
   } = useDiary();
-  if (!state && location.pathname === '/cloud') return <><main className="main-content"><button className="button secondary" onClick={() => navigate('/')}>{t('cloud.back')}</button><CloudScreen state={null} lang={lang} restoreAllowed={!locked && !storageError} onRestore={restoreFromCloud} /></main><GlobalFeedback /></>;
+  if (!state && ['/cloud', '/login'].includes(location.pathname)) return <><main className="main-content"><button className="button secondary" onClick={() => navigate('/')}>{t('cloud.back')}</button><CloudScreen state={null} lang={lang} restoreAllowed={!locked && !storageError} onRestore={restoreFromCloud} onRegisterProfile={registerProfile} /></main><GlobalFeedback /></>;
   if (storageError) return <><main className="lock-screen"><div className="card lock-card"><h1>{t('error.title')}</h1><p>{t('error.storage')}</p><button className="button primary" onClick={() => window.location.reload()}>{t('error.reload')}</button><button className="button secondary" onClick={removeAll}>{t('settings.delete')}</button></div></main><GlobalFeedback /></>;
   if (locked) return <><Locked t={t} lang={lang} setLang={setPreLang} onDelete={removeAll} onUnlock={unlock} onCloud={() => navigate('/cloud')} /><GlobalFeedback /></>;
   if (!state) return <><Welcome t={t} lang={lang} setLang={setPreLang} onStart={start} onCloud={() => navigate('/cloud')} /><GlobalFeedback /></>;

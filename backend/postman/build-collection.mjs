@@ -4,7 +4,9 @@ import { fileURLToPath } from 'node:url';
 import { createDemoData } from '../../frontend/src/data/demo.js';
 import { exportEncryptedBackup } from '../../frontend/src/services/storage.service.js';
 
-const backup = await exportEncryptedBackup(createDemoData('2026-10-25'), 'Postman fictional fixture passphrase');
+const fictionalDiary = createDemoData('2026-10-25');
+fictionalDiary.profile.ageGroup = 'under18';
+const backup = await exportEncryptedBackup(fictionalDiary, 'Postman fictional fixture passphrase');
 const items = [];
 const test = lines => ({ listen: 'test', script: { type: 'text/javascript', exec: lines } });
 function request(name, method, path, status, { body, csrf = true, checks = [], headers = [] } = {}) {
@@ -27,7 +29,7 @@ function request(name, method, path, status, { body, csrf = true, checks = [], h
 }
 const credentials = alias => ({ username: `{{${alias}}}`, password: '{{accountPassword}}' });
 const authCapture = [
-  "pm.test('Alias only in user profile', () => { pm.expect(body.data.user.id).to.be.a('string'); pm.expect(body.data.user).not.to.have.property('password'); pm.expect(body.data).not.to.have.property('token'); });",
+  "pm.test('Alias only in user profile', () => { pm.expect(body.data.user.id).to.be.a('string'); pm.expect(Object.keys(body.data.user).sort()).to.deep.equal(['id', 'username']); pm.expect(body.data).not.to.have.property('token'); });",
   "pm.collectionVariables.set('csrfToken', body.data.csrfToken);",
   "pm.test('HttpOnly session cookie', () => { const c = pm.response.headers.get('Set-Cookie'); pm.expect(c).to.include('HttpOnly'); pm.expect(c).to.match(/SameSite=Strict/i); pm.expect(c).to.include('Path=/api'); });",
 ];
@@ -39,6 +41,7 @@ request('01 Health: Express and MongoDB', 'GET', '/health', 200, { checks: ["pm.
 request('02 Anonymous diary is blocked', 'GET', '/diary/status', 401);
 request('03 Reject short account password', 'POST', '/auth/register', 400, { body: { username: '{{userA}}', password: 'short' }, csrf: false });
 request('04 Reject account injection', 'POST', '/auth/login', 400, { body: { username: { $ne: null }, password: '{{accountPassword}}' }, csrf: false });
+request('04 Reject plaintext age and contact registration fields', 'POST', '/auth/register', 400, { body: { ...credentials('userA'), ageGroup: 'under18', dateOfBirth: '2009-01-01', email: 'fictional@example.invalid', phone: '+910000000000' }, csrf: false, checks: ["pm.test('Personal fields are rejected without being reflected', () => { pm.expect(body.error.code).to.equal('BODY_INVALID'); pm.expect(pm.response.text()).not.to.include('fictional@example.invalid'); pm.expect(pm.response.text()).not.to.include('2009-01-01'); });"] });
 request('05 Register fictional account A', 'POST', '/auth/register', 201, { body: credentials('userA'), csrf: false, checks: [...authCapture, "pm.collectionVariables.set('userAId', body.data.user.id);"] });
 request('06 Duplicate alias is rejected', 'POST', '/auth/register', 409, { body: credentials('userA'), csrf: false });
 request('07 Wrong password is rejected', 'POST', '/auth/login', 401, { body: { username: '{{userA}}', password: 'Wrong-fictional-password-123' }, csrf: false, checks: ["pm.test('Generic login failure', () => pm.expect(body.error.code).to.equal('INVALID_CREDENTIALS'));"] });
@@ -68,13 +71,18 @@ request('30 Deleted backup returns 404', 'GET', '/diary/backup', 404);
 request('31 Deletion preserves monotonic revision', 'GET', '/diary/status', 200, { checks: [...noBackup, revision(2)] });
 request('32 Old upload cannot resurrect deleted backup', 'PUT', '/diary/backup', 409, { body: putBody(0) });
 request('33 Explicit new encrypted upload succeeds', 'PUT', '/diary/backup', 200, { body: putBody(2), checks: [revision(3)] });
-request('34 Logout revokes session', 'POST', '/auth/logout', 200, { checks: ["pm.test('Logged out', () => pm.expect(body.data.loggedOut).to.equal(true));"] });
+request('34 Logout revokes session', 'POST', '/auth/logout', 200, { checks: ["pm.test('Logged out', () => pm.expect(body.data.loggedOut).to.equal(true));", "pm.collectionVariables.set('previousSessionCsrf', pm.collectionVariables.get('csrfToken'));"] });
 request('35 Logged out session is rejected', 'GET', '/auth/session', 401);
 request('36 Logged out backup access is rejected', 'GET', '/diary/backup', 401);
-request('37 Sign in for account deletion', 'POST', '/auth/login', 200, { body: credentials('userA'), csrf: false, checks: authCapture });
+request('37 Returning user signs in with the same alias and password', 'POST', '/auth/login', 200, { body: credentials('userA'), csrf: false, checks: [...authCapture, "pm.test('Same account survives session revocation', () => { pm.expect(body.data.user.id).to.equal(pm.collectionVariables.get('userAId')); pm.expect(body.data.user.username).to.equal(pm.collectionVariables.get('userA')); });", "pm.test('A fresh CSRF token is issued', () => pm.expect(body.data.csrfToken).not.to.equal(pm.collectionVariables.get('previousSessionCsrf')));"] });
+request('37 Returning account session retains its alias', 'GET', '/auth/session', 200, { checks: ["pm.test('Returning session has the same identity', () => { pm.expect(body.data.user.id).to.equal(pm.collectionVariables.get('userAId')); pm.expect(body.data.user.username).to.equal(pm.collectionVariables.get('userA')); pm.expect(body.data.csrfToken).to.equal(pm.collectionVariables.get('csrfToken')); });", "pm.test('Age and contact details are absent from session metadata', () => pm.expect(Object.keys(body.data.user).sort()).to.deep.equal(['id', 'username']));"] });
+request('37 Returning user keeps the encrypted diary snapshot', 'GET', '/diary/backup', 200, { checks: [revision(3), "pm.test('Re-login preserves the exact encrypted diary', () => pm.expect(body.data.backup).to.deep.equal(JSON.parse(pm.collectionVariables.get('encryptedBackup'))));", "pm.test('Age stays inside the encrypted backup', () => { pm.expect(body.data).not.to.have.property('profile'); pm.expect(body.data.backup).not.to.have.property('ageGroup'); pm.expect(body.data.backup).not.to.have.property('dateOfBirth'); });"] });
 request('38 Delete account A and its encrypted backup', 'DELETE', '/auth/account', 200, { body: { password: '{{accountPassword}}' }, checks: ["pm.test('Account deleted', () => pm.expect(body.data.deleted).to.equal(true));"] });
 request('39 Deleted account A session is rejected', 'GET', '/auth/session', 401);
 request('40 Deleted account A cannot log in', 'POST', '/auth/login', 401, { body: credentials('userA'), csrf: false });
+
+// Keep display numbers consecutive when checks are inserted above.
+items.forEach((item, index) => { item.name = `${String(index + 1).padStart(2, '0')} ${item.name.replace(/^\d+\s+/, '')}`; });
 
 const collection = {
   info: {

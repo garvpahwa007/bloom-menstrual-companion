@@ -53,12 +53,16 @@ await withTestDatabase(async connection => {
     const requestCount = summary?.executedRequests?.executed ?? stats?.requests?.total;
     const assertionCount = summary?.tests?.executed ?? stats?.assertions?.total;
     const assertionFailures = summary?.tests?.failed ?? stats?.assertions?.failed;
-    const expectedRequests = JSON.parse(await readFile(collection, 'utf8')).item.length;
+    const expectedItems = JSON.parse(await readFile(collection, 'utf8')).item;
+    const expectedRequests = expectedItems.length;
+    const expectedAssertions = expectedItems.reduce((total, item) => total + (item.event || [])
+      .filter(event => event.listen === 'test')
+      .reduce((count, event) => count + (event.script.exec.join('\n').match(/pm\.test\(/g) || []).length, 0), 0);
     const executionErrors = summary
       ? Object.values(summary).reduce((count, value) => count + (value?.errors || 0), 0)
       : Object.values(stats || {}).reduce((count, value) => count + (value?.failed || 0), 0);
     if (run?.runError || run?.failures?.length || executionErrors || assertionFailures !== 0 ||
-        requestCount !== expectedRequests || !Number.isInteger(assertionCount) || assertionCount < 1) {
+        requestCount !== expectedRequests || !Number.isInteger(assertionCount) || assertionCount !== expectedAssertions || expectedAssertions < 1) {
       throw new Error('Postman report contains failures or an incomplete run. See backend/test-results/postman-results.json.');
     }
     console.log(`Postman: ${requestCount} requests, ${assertionCount} assertions, ${assertionFailures} failed assertions.`);

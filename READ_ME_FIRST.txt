@@ -11,7 +11,9 @@ Three development terminals:
   npm run dev:frontend    React/Vite at localhost:5173, proxies /api to Express
 
 Open Privacy & Data -> Open Cloud Backup. Tracking and education still work without an account.
-Cloud Backup uses an optional alias/password account. Uploads happen only when selected.
+Cloud Backup uses an optional alias/password account. Open /login or Account & sign in.
+Signup asks for an age group and saves it in the diary, not in the account request.
+After session expiry, sign in with the same alias/password; the diary and backup remain. Uploads happen only when selected.
 The browser encrypts the complete diary before upload. Keep a separate backup passphrase;
 the server cannot recover it. Download, decrypt, then confirm before restoring local data.
 Delete local data, cloud backup, and cloud account using their separate controls.

@@ -1,4 +1,4 @@
-import { Activity, Bell, BookOpen, CalendarDays, Heart, Home, MessageCircle, NotebookPen, ShieldCheck } from 'lucide-react';
+import { Activity, Bell, BookOpen, CalendarDays, Heart, Home, MessageCircle, NotebookPen, ShieldCheck, UserRound } from 'lucide-react';
 export const primaryNav = [{
   path: '/',
   key: 'today',
@@ -17,6 +17,10 @@ export const primaryNav = [{
   Icon: Activity
 }];
 export const supportNav = [{
+  path: '/cloud',
+  key: 'account',
+  Icon: UserRound
+}, {
   path: '/guidance',
   key: 'doctor',
   Icon: Heart

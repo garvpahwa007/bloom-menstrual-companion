@@ -4,7 +4,7 @@ import { cloudClient } from '../../services/http.service.js';
 import { uploadEncryptedDiary, decryptCloudDiary } from './cloud.service.js';
 import { cloudCopy, cloudErrorKey } from './cloud.copy.js';
 
-export function CloudScreen({ state, lang = 'en', onRestore, restoreAllowed = true, client = cloudClient }) {
+export function CloudScreen({ state, lang = 'en', onRestore, onRegisterProfile, restoreAllowed = true, client = cloudClient }) {
   const copy = cloudCopy(lang);
   const [phase, setPhase] = useState('loading');
   const [user, setUser] = useState(null);
@@ -13,6 +13,7 @@ export function CloudScreen({ state, lang = 'en', onRestore, restoreAllowed = tr
   const [alias, setAlias] = useState('');
   const [password, setPassword] = useState('');
   const [passwordConfirm, setPasswordConfirm] = useState('');
+  const [ageGroup, setAgeGroup] = useState(state?.profile.ageGroup || '');
   const [passphrase, setPassphrase] = useState('');
   const [passphraseConfirm, setPassphraseConfirm] = useState('');
   const [restorePassphrase, setRestorePassphrase] = useState('');
@@ -61,6 +62,8 @@ export function CloudScreen({ state, lang = 'en', onRestore, restoreAllowed = tr
         try { setStatus(await client.status()); } catch { /* Keep original failure; no automatic overwrite. */ }
       }
       if (error.status === 401 && error.code !== 'INVALID_CREDENTIALS') {
+        if (user?.username) setAlias(user.username);
+        setMode('login');
         setUser(null); setStatus(null); setPhase('guest'); setConfirmation(null); setPendingRestore(null);
       }
       setErrorKey(cloudErrorKey(error));
@@ -70,12 +73,24 @@ export function CloudScreen({ state, lang = 'en', onRestore, restoreAllowed = tr
   }
   async function authenticate(event) {
     event.preventDefault();
+    if (mode === 'register' && !restoreAllowed) { setErrorKey('registrationLocked'); return; }
+    if (mode === 'register' && !['under18', 'adult'].includes(ageGroup)) { setErrorKey('selectAge'); return; }
     if (mode === 'register' && password !== passwordConfirm) { setErrorKey('mismatchPassword'); return; }
     await run(async () => {
       const session = await client[mode]({ username: alias.trim(), password });
-      const backupStatus = await client.status();
+      // A new account has no backup. Do not turn a successful registration
+      // into an apparent signup failure if a follow-up status read is offline.
+      const backupStatus = mode === 'register' ? { hasBackup: false, revision: 0, updatedAt: null } : await client.status();
       if (!active.current) return;
       setUser(session.user); setStatus(backupStatus); setPhase('signedIn'); setAlias('');
+      if (mode === 'register') {
+        let saved = false;
+        try { saved = typeof onRegisterProfile === 'function' && await onRegisterProfile(ageGroup); }
+        catch { /* Account creation succeeded; preserve sign-in even if local storage fails. */ }
+        if (!active.current) return;
+        if (saved) setNoticeKey('accountCreated');
+        else setErrorKey('profileSaveFailed');
+      }
     });
   }
   async function upload(event) {
@@ -128,14 +143,17 @@ export function CloudScreen({ state, lang = 'en', onRestore, restoreAllowed = tr
     {phase === 'unavailable' && <section className="card"><p>{copy.unavailable}</p><button className="button secondary" onClick={() => setRetry(value => value + 1)}>{copy.retry}</button></section>}
     {phase === 'guest' && <section className="card stack">
       <h2>{mode === 'register' ? copy.register : copy.signIn}</h2>
-      <div className="button-row"><button className={`button ${mode === 'login' ? 'primary' : 'secondary'}`} type="button" aria-pressed={mode === 'login'} disabled={busy} onClick={() => { setMode('login'); clearSecrets(); setErrorKey(''); }}>{copy.signIn}</button><button className={`button ${mode === 'register' ? 'primary' : 'secondary'}`} type="button" aria-pressed={mode === 'register'} disabled={busy} onClick={() => { setMode('register'); clearSecrets(); setErrorKey(''); }}>{copy.register}</button></div>
+      <p className="muted">{copy.sessionHelp}</p>
+      {!restoreAllowed && <p className="notice">{copy.registrationLocked}</p>}
+      <div className="button-row"><button className={`button ${mode === 'login' ? 'primary' : 'secondary'}`} type="button" aria-pressed={mode === 'login'} disabled={busy} onClick={() => { setMode('login'); clearSecrets(); setErrorKey(''); }}>{copy.signIn}</button><button className={`button ${mode === 'register' ? 'primary' : 'secondary'}`} type="button" aria-pressed={mode === 'register'} disabled={busy || !restoreAllowed} onClick={() => { setMode('register'); clearSecrets(); setErrorKey(''); }}>{copy.register}</button></div>
       <form className="stack" onSubmit={authenticate}>
         <label className="field"><span>{copy.alias}</span><input className="input" autoCapitalize="none" autoCorrect="off" spellCheck="false" autoComplete="username" name="username" required minLength={3} maxLength={32} pattern="[a-z0-9_]{3,32}" aria-describedby="cloud-alias-help" value={alias} onChange={e => setAlias(e.target.value)} disabled={busy} /></label>
         <p className="muted text-small" id="cloud-alias-help">{copy.aliasHelp}</p>
+        {mode === 'register' && <><label className="field"><span>{copy.ageGroup}</span><select className="input" name="ageGroup" required value={ageGroup} aria-describedby="cloud-age-help" onChange={e => setAgeGroup(e.target.value)} disabled={busy || !restoreAllowed}><option value="" disabled>{copy.selectAge}</option><option value="under18">{copy.under18}</option><option value="adult">{copy.adult}</option></select></label><p className="muted text-small" id="cloud-age-help">{copy.ageHelp}</p></>}
         <label className="field"><span>{copy.password}</span><input className="input" type="password" name="password" autoComplete={mode === 'register' ? 'new-password' : 'current-password'} required minLength={12} maxLength={128} aria-describedby="cloud-password-help" value={password} onChange={e => setPassword(e.target.value)} disabled={busy} /></label>
         <p className="muted text-small" id="cloud-password-help">{copy.passwordHelp}</p>
         {mode === 'register' && <label className="field"><span>{copy.confirmPassword}</span><input className="input" type="password" autoComplete="new-password" required minLength={12} maxLength={128} value={passwordConfirm} onChange={e => setPasswordConfirm(e.target.value)} disabled={busy} /></label>}
-        <button className="button primary" type="submit" disabled={busy}>{busy ? copy.busy : mode === 'register' ? copy.register : copy.signIn}</button>
+        <button className="button primary" type="submit" disabled={busy || (mode === 'register' && !restoreAllowed)}>{busy ? copy.busy : mode === 'register' ? copy.register : copy.signIn}</button>
       </form>
     </section>}
     {phase === 'signedIn' && user && status && <>
