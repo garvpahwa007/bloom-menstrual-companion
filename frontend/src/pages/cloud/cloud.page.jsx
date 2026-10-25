@@ -141,7 +141,7 @@ export function CloudScreen({ state, lang = 'en', onRestore, onRegisterProfile, 
     {noticeKey && <p className="notice" role="status">{copy[noticeKey]}</p>}
     {phase === 'loading' && <p role="status">{copy.loading}</p>}
     {phase === 'unavailable' && <section className="card"><p>{copy.unavailable}</p><button className="button secondary" onClick={() => setRetry(value => value + 1)}>{copy.retry}</button></section>}
-    {phase === 'guest' && <section className="card stack">
+    {phase === 'guest' && <section className="card stack cloud-login-card">
       <h2>{mode === 'register' ? copy.register : copy.signIn}</h2>
       <p className="muted">{copy.sessionHelp}</p>
       {!restoreAllowed && <p className="notice">{copy.registrationLocked}</p>}

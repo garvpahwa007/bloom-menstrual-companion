@@ -357,7 +357,7 @@ export default {
   "settings.discreet": "Discreet mode",
   "settings.discreetNote": "Uses “Diary”, a neutral icon, and “Time to check in” for reminders.",
   "settings.pin": "PIN lock",
-  "settings.pinNote": "A PIN encrypts your stored diary with AES-GCM. A 4-digit PIN can be guessed by someone determined; it is a privacy layer, not a guarantee.",
+  "settings.pinNote": "Bloom opens your saved local diary directly unless PIN protection is enabled. Set a PIN to see the unlock screen each time you reopen Bloom; this encrypts your diary with AES-GCM. A 4-digit PIN is a privacy layer, not a guarantee.",
   "settings.pinWarning": "A forgotten PIN cannot be recovered. Export a backup first. Exports are readable files; keep them safe.",
   "settings.enablePin": "Set a PIN",
   "settings.disablePin": "Remove PIN lock",
