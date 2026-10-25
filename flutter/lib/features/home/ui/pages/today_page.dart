@@ -4,8 +4,10 @@ import '../../../../common/bloom_catalog.dart';
 import '../../../../common/bloom_config.dart';
 import '../../../../common/custom_theme.dart';
 import '../../../../common/feature_scaffold.dart';
+import '../../../../common/bloom_motion.dart';
 import '../../../cycle/models/cycle_analysis.dart';
 import '../../../cycle/services/cycle_service.dart';
+import '../../../cycle/ui/widgets/phase_analysis_card.dart';
 import '../../../log/services/diary_repository.dart';
 
 class TodayPage extends StatelessWidget {
@@ -87,18 +89,29 @@ class TodayPage extends StatelessWidget {
           style: Theme.of(context).textTheme.bodyMedium,
         ),
         const SizedBox(height: 16),
-        _CycleHero(
-          catalog: catalog,
-          language: language,
-          cycleDay: analysis.cycleDay,
-          phase: analysis.phase,
-          periodToday: currentLog?.period == true,
-          pregnancyMode: pregnancyMode,
-          prediction: analysis.prediction,
-          irregular: analysis.irregular,
-          suspectedGap: analysis.suspectedGaps.isNotEmpty,
-          onLog: () => pregnancyMode ? onNavigate('pregnancy') : onLog(today),
+        BloomEntrance(
+          child: _CycleHero(
+            catalog: catalog,
+            language: language,
+            cycleDay: analysis.cycleDay,
+            phase: analysis.phase,
+            periodToday: currentLog?.period == true,
+            pregnancyMode: pregnancyMode,
+            prediction: analysis.prediction,
+            irregular: analysis.irregular,
+            suspectedGap: analysis.suspectedGaps.isNotEmpty,
+            onLog: () => pregnancyMode ? onNavigate('pregnancy') : onLog(today),
+          ),
         ),
+        if (!pregnancyMode) ...[
+          const SizedBox(height: 14),
+          PhaseAnalysisCard(
+            analysis: analysis,
+            catalog: catalog,
+            language: language,
+            pregnancyMode: pregnancyMode,
+          ),
+        ],
         if (!pregnancyMode &&
             analysis.prediction != null &&
             analysis.prediction!.to.compareTo(todayKey) < 0) ...[
@@ -523,13 +536,15 @@ class _CycleHero extends StatelessWidget {
                 ),
                 child: Padding(
                   padding: const EdgeInsets.all(13),
-                  child: Image.asset(
-                    'assets/images/bloom-mark.png',
-                    fit: BoxFit.contain,
-                    errorBuilder: (_, _, _) => const Icon(
-                      Icons.spa_rounded,
-                      color: Color(0xFFEBC4C2),
-                      size: 38,
+                  child: BloomBreathe(
+                    child: Image.asset(
+                      'assets/images/bloom-mark.png',
+                      fit: BoxFit.contain,
+                      errorBuilder: (_, _, _) => const Icon(
+                        Icons.spa_rounded,
+                        color: Color(0xFFEBC4C2),
+                        size: 38,
+                      ),
                     ),
                   ),
                 ),

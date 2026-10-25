@@ -33,4 +33,5 @@ flutter:
   uses-material-design: true
   assets:
     - assets/images/bloom-mark.png
+    - assets/images/bloom-logo.png
     - assets/content/react_content.json

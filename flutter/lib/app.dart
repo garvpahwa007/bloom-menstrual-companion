@@ -35,9 +35,10 @@ class BloomApp extends StatelessWidget {
                 outline: BloomTheme.ink,
               )
             : baseTheme.colorScheme,
-        scaffoldBackgroundColor: contrast
-            ? Colors.white
-            : BloomTheme.background,
+        scaffoldBackgroundColor: Colors.transparent,
+        navigationBarTheme: baseTheme.navigationBarTheme.copyWith(
+          backgroundColor: contrast ? Colors.white : const Color(0xF2FFF4F8),
+        ),
       );
       return MaterialApp(
         title: settings['discreet'] == true
@@ -45,6 +46,13 @@ class BloomApp extends StatelessWidget {
             : BloomCatalog.instance.t('app.name', localeName),
         debugShowCheckedModeBanner: false,
         theme: theme,
+        builder: (context, child) => Stack(
+          fit: StackFit.expand,
+          children: [
+            BloomBackdrop(highContrast: contrast),
+            ?child,
+          ],
+        ),
         locale: Locale(localeName),
         supportedLocales: const [Locale('en'), Locale('hi'), Locale('ta')],
         localizationsDelegates: GlobalMaterialLocalizations.delegates,

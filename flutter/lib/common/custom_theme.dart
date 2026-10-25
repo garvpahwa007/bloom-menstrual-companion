@@ -10,7 +10,7 @@ abstract final class BloomTheme {
   static const coral = Color(0xFFC17B71);
   static const line = Color(0xFFEBE6ED);
   static const surface = Color(0xFFFFFFFF);
-  static const background = Color(0xFFFAF8FB);
+  static const background = Color(0xFFF2D0DA);
   static const peach = Color(0xFFF9EDE8);
   static const sage = Color(0xFFEFF3ED);
   static const heroStart = Color(0xFF674574);
@@ -30,7 +30,7 @@ abstract final class BloomTheme {
     return ThemeData(
       useMaterial3: true,
       colorScheme: scheme,
-      scaffoldBackgroundColor: background,
+      scaffoldBackgroundColor: Colors.transparent,
       fontFamily: 'Avenir Next',
       textTheme: const TextTheme(
         headlineLarge: TextStyle(
@@ -73,7 +73,7 @@ abstract final class BloomTheme {
         ),
       ),
       navigationBarTheme: NavigationBarThemeData(
-        backgroundColor: surface,
+        backgroundColor: const Color(0xF2FFF4F8),
         indicatorColor: lilac,
         elevation: 0,
         height: 72,
@@ -109,6 +109,140 @@ abstract final class BloomTheme {
         ),
       ),
       visualDensity: VisualDensity.standard,
+    );
+  }
+}
+
+/// Blush gradient canvas with the soft grid used by the updated React theme.
+class BloomBackdrop extends StatelessWidget {
+  const BloomBackdrop({super.key, this.highContrast = false});
+  final bool highContrast;
+
+  @override
+  Widget build(BuildContext context) {
+    if (highContrast) return const ColoredBox(color: Colors.white);
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        const DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [Color(0xFFF8E1E7), Color(0xFFF2D0DA), Color(0xFFE8AFC1)],
+            ),
+          ),
+        ),
+        const _BloomGlow(
+          center: Alignment(-0.82, -0.9),
+          color: Color(0xFFFBE9EB),
+        ),
+        const _BloomGlow(
+          center: Alignment(0.82, -0.55),
+          color: Color(0xFFF0C8D4),
+        ),
+        const _BloomGlow(
+          center: Alignment(-0.65, 0.82),
+          color: Color(0xFFEAB6C7),
+        ),
+        const Positioned.fill(child: CustomPaint(painter: _BlushGridPainter())),
+      ],
+    );
+  }
+}
+
+class _BloomGlow extends StatelessWidget {
+  const _BloomGlow({required this.center, required this.color});
+  final Alignment center;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) => DecoratedBox(
+    decoration: BoxDecoration(
+      gradient: RadialGradient(
+        center: center,
+        radius: 0.82,
+        colors: [color, color.withValues(alpha: 0)],
+        stops: const [0.05, 1],
+      ),
+    ),
+  );
+}
+
+class _BlushGridPainter extends CustomPainter {
+  const _BlushGridPainter();
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = Colors.white.withValues(alpha: .58)
+      ..strokeWidth = 1;
+    for (final fraction in const [1 / 3, 2 / 3]) {
+      final x = size.width * fraction;
+      final y = size.height * fraction;
+      canvas.drawLine(Offset(x, 0), Offset(x, size.height), paint);
+      canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _BlushGridPainter oldDelegate) => false;
+}
+
+/// A gentle loop used for Bloom's hero mark; it stops for reduced-motion users.
+class BloomBreathe extends StatefulWidget {
+  const BloomBreathe({
+    super.key,
+    required this.child,
+    this.amplitude = 0.035,
+    this.duration = const Duration(milliseconds: 3200),
+  });
+  final Widget child;
+  final double amplitude;
+  final Duration duration;
+
+  @override
+  State<BloomBreathe> createState() => _BloomBreatheState();
+}
+
+class _BloomBreatheState extends State<BloomBreathe>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller = AnimationController(
+    vsync: this,
+    duration: widget.duration,
+  );
+  bool? _reducedMotion;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final reducedMotion = MediaQuery.of(context).disableAnimations;
+    if (reducedMotion == _reducedMotion) return;
+    _reducedMotion = reducedMotion;
+    if (reducedMotion) {
+      _controller.stop();
+      _controller.value = 0;
+    } else {
+      _controller.repeat(reverse: true);
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (MediaQuery.of(context).disableAnimations) return widget.child;
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) => Transform.scale(
+        scale: 1 + (_controller.value * widget.amplitude),
+        child: child,
+      ),
+      child: widget.child,
     );
   }
 }

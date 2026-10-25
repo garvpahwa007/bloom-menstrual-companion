@@ -2,10 +2,12 @@
 
 A local-first Flutter port of the Bloom React frontend. It carries over Bloom’s plum/lilac palette, warm light surfaces, coral accents, brand mark, mobile navigation, cycle calculations, age-aware content, and offline educational catalogs. The project follows the reference Flutter layout: shared code in `lib/common/` and feature-owned code in `lib/features/<feature>/`.
 
+The shared app canvas now uses Bloom’s blush gradient and soft grid. Subtle hero and card animations stop when the device requests reduced motion; high-contrast mode keeps a plain white background.
+
 ## Feature coverage
 
-- **Welcome and access:** English, Hindi, and Tamil onboarding; adult/under-18 profile choice; clean or fictional demo diary; PIN unlock and storage recovery.
-- **Cycle and diary:** Today dashboard, full daily check-in, cycle/calendar views, cycle statistics, date-gap review, and clearly qualified estimates.
+- **Welcome and access:** English, Hindi, and Tamil onboarding with the full Bloom logo and localized tagline; adult/under-18 profile choice; clean or fictional demo diary; PIN unlock and storage recovery.
+- **Cycle and diary:** Today dashboard with an estimated-phase timeline and hormone-education caveat, full daily check-in, cycle/calendar views, cycle statistics, date-gap review, and clearly qualified estimates. The phase visualization is hidden in pregnancy mode and never represents a hormone test or contraception guidance.
 - **Health support:** clinician guidance and red-flag summaries, offline FAQ-style Ask support with safety escalation, age-ordered Learn content with optional device speech, and guarded pregnancy support.
 - **Planning and reports:** local reminders, visit summaries and PDF/share actions.
 - **Settings and privacy:** language, accessibility, discreet mode, tracked symptoms, optional PIN, JSON/CSV export, encrypted backup export/import, and confirmed local deletion.

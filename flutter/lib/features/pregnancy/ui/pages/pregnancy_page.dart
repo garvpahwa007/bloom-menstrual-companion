@@ -4,6 +4,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../../common/bloom_catalog.dart';
 import '../../../../common/bloom_config.dart';
 import '../../../../common/custom_theme.dart';
+import '../../../../common/bloom_motion.dart';
 import '../../../../common/date_utils.dart';
 import '../../../../common/feature_scaffold.dart';
 import '../../../log/services/diary_repository.dart';
@@ -60,9 +61,9 @@ class _PregnancyPageState extends State<PregnancyPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (!active)
-            _setup()
+            BloomEntrance(child: _setup())
           else ...[
-            _pregnancyHero(week),
+            BloomEntrance(child: _pregnancyHero(week)),
             const SizedBox(height: 12),
             BloomCard(
               title: _catalog.t('pregnancy.weekChoose', _lang),

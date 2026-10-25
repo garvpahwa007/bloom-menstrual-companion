@@ -2,6 +2,8 @@ import 'dart:convert';
 
 import 'package:flutter/services.dart';
 
+import 'phase_analysis_translations.dart';
+
 class BloomCatalog {
   BloomCatalog._(this._data);
   final Map<String, dynamic> _data;
@@ -39,7 +41,11 @@ class BloomCatalog {
     final selected =
         translations[language] as Map<String, dynamic>? ?? const {};
     final english = translations['en'] as Map<String, dynamic>? ?? const {};
-    final value = selected[key] ?? english[key] ?? key;
+    final value =
+        selected[key] ??
+        english[key] ??
+        PhaseAnalysisTranslations.lookup(key, language) ??
+        key;
     var output = value.toString();
     for (final entry in variables.entries) {
       output = output.replaceAll('{${entry.key}}', '${entry.value}');

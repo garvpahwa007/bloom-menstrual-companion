@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../common/bloom_catalog.dart';
 import '../../../../common/custom_theme.dart';
 import '../../../log/services/diary_repository.dart';
+import '../widgets/welcome_art.dart';
 
 class WelcomePage extends StatefulWidget {
   const WelcomePage({super.key, required this.diary});
@@ -23,23 +24,19 @@ class _WelcomePageState extends State<WelcomePage> {
   @override
   Widget build(BuildContext context) => Scaffold(
     body: DecoratedBox(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFFFAF8FB), Color(0xFFF2EAF4), Color(0xFFFFF7F2)],
-        ),
-      ),
+      decoration: const BoxDecoration(color: Colors.transparent),
       child: SafeArea(
         child: ListView(
           padding: const EdgeInsets.fromLTRB(22, 12, 22, 26),
           children: [
             Row(
               children: [
-                Image.asset(
-                  'assets/images/bloom-mark.png',
-                  width: 36,
-                  height: 36,
+                BloomBreathe(
+                  child: Image.asset(
+                    'assets/images/bloom-mark.png',
+                    width: 36,
+                    height: 36,
+                  ),
                 ),
                 const SizedBox(width: 9),
                 Text(
@@ -63,7 +60,9 @@ class _WelcomePageState extends State<WelcomePage> {
                 ),
               ],
             ),
-            const SizedBox(height: 26),
+            const SizedBox(height: 16),
+            WelcomeArt(catalog: _catalog, language: _language),
+            const SizedBox(height: 22),
             Container(
               padding: const EdgeInsets.all(22),
               decoration: BoxDecoration(
