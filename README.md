@@ -12,7 +12,7 @@ The working prototype is designed for a student such as Ananya, 17, who prefers 
 
 Historical verification on 24 October 2026 (before the folder refactor): after the lockfile repair, `npm ci` succeeded; **197/197 automated tests passed**, the production build succeeded, and `git diff --check` was clean. Coverage includes English/Hindi urgent Ask phrasing, dated diary save/reload/edit flows, calendar and Insights behavior, settings persistence, heavy-flow state transitions, encrypted backups and static-only PWA hosting/offline checks. The primary production address is [bloom-period-companion.vercel.app](https://bloom-period-companion.vercel.app/), and production checks confirmed its canonical/Open Graph tags; the previous Saheli address remains an alias. See [VALIDATION.md](docs/VALIDATION.md) for evidence and limits, and [BUILD_2_AUDIT.md](docs/BUILD_2_AUDIT.md) for the user's feature-by-feature Build 2 status and remaining reviews.
 
-The project is now an npm workspace with the React app in `frontend/`, Express API in `backend/`, and supporting reports in `docs/`. The structural refactor is on the local branch `refactor/bloodlink-structure`; the published branch can be reviewed before merging into `main`. The 24 October results and production evidence above describe the earlier build. See [STRUCTURE.md](docs/STRUCTURE.md) for the code layout and [REFACTOR_VALIDATION.md](docs/REFACTOR_VALIDATION.md) for the refactor checks and their limits.
+The repository contains the React app in `frontend/`, Express API in `backend/`, Flutter mobile app in `flutter/`, and supporting reports in `docs/`. The web workspace refactor is on the local branch `refactor/bloodlink-structure`; the published branch can be reviewed before merging into `main`. The 24 October results and production evidence above describe the earlier web build. See [STRUCTURE.md](docs/STRUCTURE.md) for the web code layout and [REFACTOR_VALIDATION.md](docs/REFACTOR_VALIDATION.md) for the refactor checks and their limits.
 
 Follow the step-by-step checklist in [PROJECT_PROGRESS.md](docs/PROJECT_PROGRESS.md). That file records implementation and actual validation results; this README does not imply that an unrecorded browser check or deployment has passed.
 
@@ -56,6 +56,26 @@ npm start
 ```
 
 With MongoDB running, `npm start` serves the built app and API at port 3000. For a frontend-only static preview, use `npm run preview` at port 5173 and stop Vite development first. Web Crypto requires **localhost or HTTPS**; a plain HTTP LAN address may not support the PIN feature.
+
+## Flutter mobile app
+
+The separate Flutter client lives in [`flutter/`](flutter/). It follows a feature-oriented Dart structure (`lib/common/` and `lib/features/<feature>/`) and carries over Bloom’s palette, English/Hindi/Tamil offline content, cycle and safety rules, local diary, learning and support screens, reminders, and visit reports. Its health guidance is informational and does not diagnose or replace professional care.
+
+Run the mobile app from the `flutter/` directory with Flutter installed:
+
+```sh
+cd flutter
+flutter pub get
+flutter run
+```
+
+Run its tests and static analysis with `flutter test` and `flutter analyze`. Local diary features work without an account or backend. Optional account and cloud-backup requests are configured at run time; provide the backend origin (without `/api/v1`) as `BLOOM_API_BASE_URL`, for example:
+
+```sh
+flutter run --dart-define=BLOOM_API_BASE_URL=https://api.example.com
+```
+
+The Flutter client keeps diary data on-device by default. A local PIN enables an encrypted AES-GCM vault; cloud backup is a separate, explicit, passphrase-encrypted upload. See the [Flutter README](flutter/README.md) for storage details, API configuration, supported workflows, platform notes, and test coverage. Do not commit backend credentials, PINs, passphrases, or personal diary data.
 
 ## Screens
 
