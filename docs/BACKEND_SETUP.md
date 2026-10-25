@@ -19,11 +19,25 @@ npm run dev:backend
 npm run dev:frontend
 ```
 
-Open [http://localhost:5173](http://localhost:5173). Start fresh or try the demo, then open **Privacy & Data → Open Cloud Backup**. The Welcome and locked screens also offer cloud management/restore. An empty browser can restore a backup without first making a local diary. An existing PIN-locked diary must be unlocked before replacement.
+Open [http://localhost:5173](http://localhost:5173). Start fresh or try the demo, then open **Privacy & Data → Open Cloud Backup**. The Welcome and locked screens also offer account access; `/login` is a direct entry point and the app menu includes Account & sign in. An empty browser can restore a backup without first making a local diary. An existing PIN-locked diary must be unlocked before replacement.
 
 The defaults need no secret files. MongoDB listens at `127.0.0.1:27018`, Express at `127.0.0.1:3000`, and Vite at port 5173. Local MongoDB data persists in the ignored `backend/.local-mongo/` folder. This unauthenticated, loopback-only database helper is for development. It is separate from BloodLink's database. On a new computer, the first database/test run downloads MongoDB 8.0.17; alternatively set `MONGOMS_SYSTEM_BINARY` to a compatible local `mongod` executable. Stop it with Ctrl+C before restarting it.
 
 To override defaults, copy `backend/.env.example` to `backend/.env`. Keep that file private. A real MongoDB URI belongs in the backend environment, never in a `VITE_` variable or frontend bundle.
+
+## Using MongoDB Atlas instead of local MongoDB
+
+Set `MONGODB_URI` in ignored `backend/.env` to your private Atlas URI. Include the intended database name, such as `/bloom`, and keep the file private. The current local environment is configured to use Atlas; the credentials are not part of this repository.
+
+```text
+MONGODB_URI="mongodb+srv://<database-user>:<URL-encoded-password>@<cluster-host>/bloom?retryWrites=true&w=majority&appName=Bloom"
+```
+
+The example contains placeholders only. Configure an Atlas database user with access to the intended database and permit the backend host's IP in the Atlas access list. Do not put this URI into `frontend/.env`, a `VITE_` variable, a Postman collection, or Git. Rotate any database password shared in chat, then update the private backend environment and restart the API.
+
+With Atlas, `npm run db:dev` is unnecessary. Run `npm run dev:backend` and `npm run dev:frontend` in two terminals, or build and run `npm start` to serve the complete app at port 3000. Check `/api/v1/health` after startup. Existing accounts/backups from the earlier local database remain there; switching the URI does not migrate them to Atlas. No local records were copied automatically.
+
+A local live check verified signup, actual Atlas persistence, encrypted backup round-trip, expiry/re-login, and cleanup using a temporary synthetic account. This configuration applies to this computer's backend. A hosted backend needs its own private environment variable and Atlas host access; pushing source code does not configure hosting secrets.
 
 For a single local server with the built frontend:
 
@@ -37,12 +51,13 @@ Open [http://localhost:3000](http://localhost:3000). `npm start` serves both the
 
 ## Account and backup walkthrough
 
-1. Choose an alias using 3–32 lowercase letters, numbers or underscores. No email, phone number or real name is requested. Use a 12–128 character account password.
+1. Choose an alias using 3–32 lowercase letters, numbers or underscores. No email, phone number or real name is requested. Use a 12–128 character account password. During signup, choose Under 18 or 18 or older. That age group is saved in the device diary, protected by the local PIN when enabled, and included inside any encrypted backup. The signup request sends only alias/password; no birth date or contact information is collected.
 2. Choose a **different** backup passphrase of at least 12 characters. Save it privately; it is separate from the four-digit local PIN and the account password. No password/passphrase recovery is provided.
 3. Select **Encrypt and save backup**. This replaces the account's previous snapshot. Future diary edits remain local until another explicit upload.
 4. On another browser, open Cloud Backup, sign in, and enter the saved backup passphrase. Download/decrypt runs on that device; confirm separately before replacing its local diary.
-5. Sign out on shared devices. PIN lock clears in-memory cloud authorization and attempts remote sign-out when this page has established a session. Local locking never waits for network access; offline sign-out cannot be guaranteed.
-6. Delete the cloud backup while retaining the account, or confirm account deletion with the current password. Device deletion is separate and leaves cloud data in place. Operator database backups and downloaded exports have their own retention outside this app.
+5. When a session expires, sign in again using the same alias/password. The account and backup are retained; the local diary is not reset, and age is not requested again for login. On a fresh device, restore the encrypted backup to retrieve the saved age group and diary. Keep the age group current through Settings.
+6. Sign out on shared devices. PIN lock clears in-memory cloud authorization and attempts remote sign-out when this page has established a session. Local locking never waits for network access; offline sign-out cannot be guaranteed.
+7. Delete the cloud backup while retaining the account, or confirm account deletion with the current password. Device deletion is separate and leaves cloud data in place. Operator database backups and downloaded exports have their own retention outside this app.
 
 ## Checks and Postman
 

@@ -70,7 +70,7 @@ test('the upload boundary sends a decryptable envelope without diary plaintext o
 
 await build({ entryPoints: [new URL('../src/pages/cloud/cloud.page.jsx', import.meta.url).pathname], outfile: new URL('../.test-cache/Cloud.mjs', import.meta.url).pathname, bundle: true, platform: 'node', format: 'esm', packages: 'external', target: 'node20', jsx: 'automatic', logLevel: 'warning' });
 const dom = new JSDOM('<!doctype html><html lang="en"><head><title>Cloud backup test</title></head><body></body></html>', { url: 'http://localhost:3000/', pretendToBeVisual: true });
-for (const key of ['window', 'document', 'navigator', 'HTMLElement', 'HTMLInputElement', 'Event', 'MouseEvent', 'localStorage', 'sessionStorage']) Object.defineProperty(globalThis, key, { configurable: true, value: dom.window[key] });
+for (const key of ['window', 'document', 'navigator', 'HTMLElement', 'HTMLInputElement', 'HTMLSelectElement', 'Event', 'MouseEvent', 'localStorage', 'sessionStorage']) Object.defineProperty(globalThis, key, { configurable: true, value: dom.window[key] });
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
 const { createRoot } = await import('react-dom/client');
 const { default: CloudScreen } = await import('../.test-cache/Cloud.mjs');
@@ -84,6 +84,10 @@ async function click(text) { await act(async () => { assert.ok(button(text), `Mi
 async function fill(label, value) {
   const field = input(label); assert.ok(field, `Missing input: ${label}`);
   await act(async () => { Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set.call(field, value); field.dispatchEvent(new Event('input', { bubbles: true })); });
+}
+async function chooseAge(value) {
+  const field = document.querySelector('select[name="ageGroup"]'); assert.ok(field, 'Missing age-group choice');
+  await act(async () => { Object.getOwnPropertyDescriptor(window.HTMLSelectElement.prototype, 'value').set.call(field, value); field.dispatchEvent(new Event('change', { bubbles: true })); });
 }
 async function submit(label) { const form = input(label)?.closest('form'); assert.ok(form); await act(async () => { form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true })); }); }
 async function waitFor(check) {
@@ -217,4 +221,115 @@ test('locking clears in-memory cloud authorization immediately even when remote 
   const calls = requests.length;
   assert.equal(await client.lockSession(), false);
   assert.equal(requests.length, calls, 'a local-only lock must not contact the account server');
+});
+
+test('signup saves the selected age group locally and sends only alias/password to the account API', async () => {
+  const registrations = []; const profiles = [];
+  await mount({
+    session: async () => { throw new ApiError('AUTH_REQUIRED', 401); },
+    register: async credentials => { registrations.push(credentials); return { user: { username: credentials.username }, csrfToken: 'new-session' }; },
+    status: async () => { assert.fail('A new account must not depend on a follow-up status request.'); },
+  }, { state: null, onRegisterProfile: async ageGroup => { profiles.push(ageGroup); return true; } });
+  await click(copy.register);
+  await fill(copy.alias, 'fictional_new_user');
+  await chooseAge('adult');
+  await fill(copy.password, 'synthetic-account-password');
+  await fill(copy.confirmPassword, 'synthetic-account-password');
+  await submit(copy.password);
+  assert.deepEqual(registrations, [{ username: 'fictional_new_user', password: 'synthetic-account-password' }]);
+  assert.deepEqual(profiles, ['adult']);
+  assert.ok(document.body.textContent.includes(copy.accountCreated));
+  assert.ok(button(copy.logout));
+  assert.equal(localStorage.length, 0); assert.equal(sessionStorage.length, 0);
+});
+
+test('signup needs an explicit age choice on a fresh device before creating an account', async () => {
+  let registrations = 0; let profiles = 0;
+  await mount({
+    session: async () => { throw new ApiError('AUTH_REQUIRED', 401); },
+    register: async () => { registrations++; throw new Error('Should not register'); },
+  }, { state: null, onRegisterProfile: async () => { profiles++; return true; } });
+  await click(copy.register);
+  await fill(copy.alias, 'fictional_age_choice');
+  await fill(copy.password, 'synthetic-account-password');
+  await fill(copy.confirmPassword, 'synthetic-account-password');
+  // Dispatch directly as well as relying on required validation: the handler
+  // must enforce this boundary even if native form validation is bypassed.
+  await submit(copy.password);
+  assert.equal(registrations, 0); assert.equal(profiles, 0);
+  assert.ok(document.querySelector('[role="alert"]').textContent.includes(copy.selectAge));
+  const result = await axe.run(document, { rules: { 'color-contrast': { enabled: false } } });
+  assert.deepEqual(result.violations.map(v => v.id), []);
+});
+
+test('a failed local age save preserves the newly created account and reports the correct recovery step', async () => {
+  let registrations = 0;
+  await mount({
+    session: async () => { throw new ApiError('AUTH_REQUIRED', 401); },
+    register: async credentials => { registrations++; return { user: { username: credentials.username }, csrfToken: 'new-session' }; },
+    status: async () => ({ hasBackup: false, revision: 0 }),
+  }, { onRegisterProfile: async () => false });
+  await click(copy.register);
+  await fill(copy.alias, 'fictional_save_failure');
+  await fill(copy.password, 'synthetic-account-password');
+  await fill(copy.confirmPassword, 'synthetic-account-password');
+  await submit(copy.password);
+  assert.equal(registrations, 1);
+  assert.ok(button(copy.logout));
+  assert.equal(input(copy.password), undefined);
+  assert.ok(document.querySelector('[role="alert"]').textContent.includes(copy.profileSaveFailed));
+  assert.ok(document.body.textContent.includes('fictional_save_failure'));
+});
+
+test('returning sign-in uses alias/password without changing age information', async () => {
+  const logins = []; let profileWrites = 0;
+  await mount({
+    session: async () => { throw new ApiError('AUTH_REQUIRED', 401); },
+    login: async credentials => { logins.push(credentials); return { user: { username: credentials.username }, csrfToken: 'returning-session' }; },
+    status: async () => ({ hasBackup: true, revision: 3 }),
+  }, { state: null, onRegisterProfile: async () => { profileWrites++; return true; } });
+  assert.equal(document.querySelector('select[name="ageGroup"]'), null);
+  assert.ok(document.body.textContent.includes(copy.sessionHelp));
+  await fill(copy.alias, 'fictional_returning_user');
+  await fill(copy.password, 'synthetic-account-password');
+  await submit(copy.password);
+  assert.deepEqual(logins, [{ username: 'fictional_returning_user', password: 'synthetic-account-password' }]);
+  assert.equal(profileWrites, 0);
+  assert.ok(document.body.textContent.includes(copy.backupExists));
+});
+
+test('an expired upload session returns to sign-in and reauthentication recovers the same cloud account', async () => {
+  const logins = []; let uploads = 0; let profiles = 0;
+  const diary = createDemoData('2026-10-25');
+  const original = structuredClone(diary);
+  await mount(signedClient({
+    status: async () => ({ hasBackup: true, revision: 7 }),
+    upload: async () => { uploads++; throw new ApiError('AUTH_REQUIRED', 401); },
+    login: async credentials => { logins.push(credentials); return { user: { username: credentials.username }, csrfToken: 'renewed-session' }; },
+  }), { state: diary, onRegisterProfile: async () => { profiles++; return true; } });
+  await fill(copy.passphrase, 'synthetic-backup-passphrase');
+  await fill(copy.confirmPassphrase, 'synthetic-backup-passphrase');
+  await submit(copy.passphrase);
+  await waitFor(() => !!input(copy.password));
+  assert.equal(input(copy.alias).value, 'fictional');
+  assert.equal(input(copy.password).value, '');
+  assert.equal(document.querySelector('select[name="ageGroup"]'), null);
+  assert.ok(document.querySelector('[role="alert"]').textContent.includes(copy.expired));
+  assert.equal(input(copy.passphrase), undefined);
+  await fill(copy.password, 'synthetic-account-password');
+  await submit(copy.password);
+  assert.deepEqual(logins, [{ username: 'fictional', password: 'synthetic-account-password' }]);
+  assert.ok(button(copy.logout));
+  assert.ok(document.body.textContent.includes(copy.backupExists));
+  assert.equal(uploads, 1); assert.equal(profiles, 0);
+  assert.deepEqual(diary, original);
+  assert.equal(localStorage.length, 0); assert.equal(sessionStorage.length, 0);
+});
+
+test('a PIN-locked guest can sign in but cannot start signup with an unsaved age choice', async () => {
+  await mount({ session: async () => { throw new ApiError('AUTH_REQUIRED', 401); } }, { state: null, restoreAllowed: false });
+  assert.equal(button(copy.register).disabled, true);
+  assert.equal(button(copy.signIn).disabled, false);
+  assert.ok(document.body.textContent.includes(copy.registrationLocked));
+  assert.equal(document.querySelector('select[name="ageGroup"]'), null);
 });

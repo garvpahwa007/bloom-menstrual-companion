@@ -17,6 +17,8 @@ Base path: `/api/v1`. Successful responses use `{ "data": ... }`. Failures use `
 
 All diary routes and session/logout/account routes require the `bloom.sid` cookie. Authenticated mutations also require `X-CSRF-Token` from the current session response. The cookie is HttpOnly, SameSite=Strict, scoped to `/api`, expires after seven days, and is Secure in production. Only its SHA-256 hash is stored in MongoDB. The frontend keeps CSRF in memory; it stores neither session tokens nor passwords in browser storage.
 
+Age group is selected in the React signup form and saved only inside the device diary and encrypted snapshots. The account endpoints continue to accept only alias/password. Plaintext `ageGroup`, date-of-birth, email and phone registration fields are rejected. On expiry, the existing account can sign in again; the server rotates session/CSRF credentials and retains the encrypted backup.
+
 Aliases use `/^[a-z0-9_]{3,32}$/`; passwords use 12–128 characters and are salted scrypt hashes (`N=32768, r=8, p=3`). Password verification and registration share a limit of 100 requests per 15 minutes per IP, including account-deletion password checks. Reads and logout remain available when that limit is reached. Backup mutations allow 100 changes per 15 minutes per account. Counters are in-process. The password cost follows one configuration listed in the [OWASP Password Storage Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html#scrypt).
 
 ## Encrypted envelope

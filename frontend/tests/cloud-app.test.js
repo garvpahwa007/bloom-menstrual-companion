@@ -7,7 +7,7 @@ import React, { act } from 'react';
 import en from '../src/i18n/en.js';
 import { createDemoData } from '../src/data/demo.js';
 import { cloudCopy } from '../src/pages/cloud/cloud.copy.js';
-import { enablePIN, exportEncryptedBackup, STORAGE_KEY } from '../src/services/storage.service.js';
+import { enablePIN, unlockPIN, exportEncryptedBackup, STORAGE_KEY } from '../src/services/storage.service.js';
 
 // Full application/context regression checks use synthetic cookies and a
 // disposable DOM. They never contact an account server or use a real diary.
@@ -148,4 +148,99 @@ test('full App: Privacy opens optional Cloud without any account request from lo
   assert.ok(input(copy.passphrase));
   assert.ok(document.body.textContent.includes(copy.backupExists));
   assert.equal(requests.filter(request => request.url === '/api/v1/auth/session').length, 1);
+});
+
+const signedOut = () => ({ status: 401, ok: false, json: async () => ({ error: { code: 'AUTH_REQUIRED' } }) });
+function signupServer() {
+  let registered = false;
+  globalThis.fetch = async (url, options = {}) => {
+    requests.push({ url, options });
+    if (url === '/api/v1/auth/register') {
+      assert.deepEqual(JSON.parse(options.body), { username: 'fictional_new', password: 'synthetic-signup-password' });
+      registered = true;
+      return response({ user: { id: 'new-account', username: 'fictional_new' }, csrfToken: 'new-account-csrf' });
+    }
+    if (url === '/api/v1/auth/session') return registered ? response({ user: { id: 'new-account', username: 'fictional_new' }, csrfToken: 'new-account-csrf' }) : signedOut();
+    if (url === '/api/v1/diary/status') return response({ hasBackup: false, revision: 0 });
+    assert.fail(`Unexpected account signup request: ${options.method} ${url}`);
+  };
+}
+async function chooseSignupAge(value) {
+  const select = document.querySelector('select[name="ageGroup"]'); assert.ok(select);
+  await act(async () => {
+    Object.getOwnPropertyDescriptor(window.HTMLSelectElement.prototype, 'value').set.call(select, value);
+    select.dispatchEvent(new Event('change', { bubbles: true }));
+  });
+}
+async function registerWithAge(value) {
+  await click(copy.register);
+  await chooseSignupAge(value);
+  await fill(copy.alias, 'fictional_new');
+  await fill(copy.password, 'synthetic-signup-password');
+  await fill(copy.confirmPassword, 'synthetic-signup-password');
+  await submit(copy.password);
+}
+
+test('full App: optional signup from /login saves selected age in an empty diary without uploading it', async () => {
+  signupServer();
+  await mount('/login');
+  await registerWithAge('adult');
+  await waitFor(() => !!document.querySelector('.app-shell'));
+  const stored = JSON.parse(localStorage.getItem(STORAGE_KEY));
+  assert.equal(stored.data.profile.ageGroup, 'adult');
+  assert.equal(stored.data.demo, false);
+  assert.deepEqual(stored.data.logs, {}, 'Signup must create a real empty diary.');
+  assert.ok(document.body.textContent.includes(copy.accountCreated));
+  assert.equal(requests.filter(item => item.url === '/api/v1/auth/register').length, 1);
+  assert.equal(requests.some(item => item.url === '/api/v1/diary/backup'), false, 'Age and diary require an explicit encrypted upload.');
+  assert.equal(JSON.stringify(stored).includes('synthetic-signup-password'), false);
+  assert.equal(JSON.stringify(stored).includes('fictional_new'), false, 'The login alias belongs to the account, not a duplicate local identity record.');
+});
+
+test('full App: signup updates an unlocked PIN diary age while retaining its encrypted logs', async () => {
+  await enablePIN(diary, '4826');
+  signupServer();
+  await mount('/');
+  await fill(en['settings.enterPin'], '4826');
+  await submit(en['settings.enterPin']);
+  await waitFor(() => !!document.querySelector('.app-shell'));
+  const privacyLink = document.querySelector('a[href="/privacy"]'); assert.ok(privacyLink);
+  await act(async () => privacyLink.click());
+  await click(en['privacyData.cloudOpen']);
+  await registerWithAge('adult');
+  const stored = JSON.parse(localStorage.getItem(STORAGE_KEY));
+  assert.equal(stored.encrypted, true);
+  assert.equal(stored.data, undefined);
+  assert.equal(JSON.stringify(stored).includes('Synthetic full-app cloud restore'), false);
+  const unlocked = await unlockPIN('4826');
+  assert.equal(unlocked.state.profile.ageGroup, 'adult');
+  assert.deepEqual(unlocked.state.logs, diary.logs);
+  assert.equal(requests.some(item => item.options.method === 'PUT'), false);
+});
+
+test('full App: session expiry and returning login retain the saved device age and diary', async () => {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify({ version: 1, encrypted: false, data: diary }));
+  const original = localStorage.getItem(STORAGE_KEY);
+  globalThis.fetch = async (url, options = {}) => {
+    requests.push({ url, options });
+    if (url === '/api/v1/auth/session' || url === '/api/v1/auth/login') {
+      if (url.endsWith('/login')) assert.deepEqual(JSON.parse(options.body), { username: 'fictional', password: 'synthetic-returning-password' });
+      return response({ user: { id: 'same-account', username: 'fictional' }, csrfToken: 'refreshed-csrf' });
+    }
+    if (url === '/api/v1/diary/status') return response({ hasBackup: true, revision: 3 });
+    if (url === '/api/v1/diary/backup') return signedOut();
+    assert.fail(`Unexpected expiry request: ${url}`);
+  };
+  await mount('/cloud');
+  await fill(copy.restorePassphrase, 'synthetic-restore-passphrase');
+  await submit(copy.restorePassphrase);
+  assert.ok(document.body.textContent.includes(copy.expired));
+  assert.equal(input(copy.alias).value, 'fictional');
+  assert.equal(input(copy.password).value, '');
+  assert.equal(document.querySelector('select[name="ageGroup"]'), null, 'A returning login does not ask for age again.');
+  await fill(copy.password, 'synthetic-returning-password');
+  await submit(copy.password);
+  assert.ok(document.body.textContent.includes(copy.backupExists));
+  assert.equal(localStorage.getItem(STORAGE_KEY), original);
+  assert.equal(requests.some(item => item.url.endsWith('/register')), false);
 });

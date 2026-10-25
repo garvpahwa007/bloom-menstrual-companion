@@ -18,7 +18,7 @@ export default function MobileNavigation() {
       ...primaryNav[3],
       mobileKey: 'insightsShort'
     }, {
-      ...supportNav[1],
+      ...supportNav.find(item => item.path === '/learn'),
       mobileKey: 'learn'
     }, {
       path: '/settings',

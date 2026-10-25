@@ -177,6 +177,20 @@ export function DiaryProvider({
       setToast(t('common.error'));
     }
   };
+  const registerProfile = async ageGroup => {
+    if (!['under18', 'adult'].includes(ageGroup) || locked || storageError) return false;
+    const saved = await updateState(current => {
+      // Account signup creates a real empty diary, never synthetic history.
+      const data = current || { ...createDemoData(), demo: false, logs: {} };
+      return {
+        ...data,
+        profile: { ...data.profile, ageGroup },
+        settings: current ? data.settings : { ...data.settings, language: preLang },
+      };
+    }, { allowEmpty: true });
+    if (saved) setToast(t('cloud.accountCreated'));
+    return saved;
+  };
   const lock = async () => {
     await queue.current.catch(() => {});
     if (!vaultRef.current) return;
@@ -400,6 +414,7 @@ export function DiaryProvider({
     navigate,
     updateState,
     restoreFromCloud: imported => updateState(imported, { allowEmpty: true }),
+    registerProfile,
     locked,
     storageError,
     preLang,
