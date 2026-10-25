@@ -5,7 +5,11 @@ Use Node.js >=20.19 and npm. Run all commands from this project root.
 Install:
   npm ci
 
-Three development terminals:
+The current private local environment uses MongoDB Atlas. With Atlas, run only
+Express and React (or npm start for the built app); the db:dev helper is unnecessary.
+See docs/BACKEND_SETUP.md for Atlas setup, credential handling and migration boundaries.
+
+Three development terminals when using local MongoDB instead:
   npm run db:dev          MongoDB at 127.0.0.1:27018 (persistent development data)
   npm run dev:backend     Express API at localhost:3000/api/v1
   npm run dev:frontend    React/Vite at localhost:5173, proxies /api to Express

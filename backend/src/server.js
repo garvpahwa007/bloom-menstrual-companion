@@ -19,7 +19,7 @@ try {
   process.once('SIGINT', shutdown);
 } catch {
   // Avoid printing a URI that may contain database credentials.
-  console.error('Bloom API could not start. Check backend/.env and that MongoDB is running (npm run db:dev).');
+  console.error('Bloom API could not start. Check backend/.env, database credentials and network access. For Atlas, check the database user and host IP access; for local MongoDB, run npm run db:dev.');
   await connection?.close();
   process.exitCode = 1;
 }

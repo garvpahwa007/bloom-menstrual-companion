@@ -25,6 +25,20 @@ The defaults need no secret files. MongoDB listens at `127.0.0.1:27018`, Express
 
 To override defaults, copy `backend/.env.example` to `backend/.env`. Keep that file private. A real MongoDB URI belongs in the backend environment, never in a `VITE_` variable or frontend bundle.
 
+## Using MongoDB Atlas instead of local MongoDB
+
+Set `MONGODB_URI` in ignored `backend/.env` to your private Atlas URI. Include the intended database name, such as `/bloom`, and keep the file private. The current local environment is configured to use Atlas; the credentials are not part of this repository.
+
+```text
+MONGODB_URI="mongodb+srv://<database-user>:<URL-encoded-password>@<cluster-host>/bloom?retryWrites=true&w=majority&appName=Bloom"
+```
+
+The example contains placeholders only. Configure an Atlas database user with access to the intended database and permit the backend host's IP in the Atlas access list. Do not put this URI into `frontend/.env`, a `VITE_` variable, a Postman collection, or Git. Rotate any database password shared in chat, then update the private backend environment and restart the API.
+
+With Atlas, `npm run db:dev` is unnecessary. Run `npm run dev:backend` and `npm run dev:frontend` in two terminals, or build and run `npm start` to serve the complete app at port 3000. Check `/api/v1/health` after startup. Existing accounts/backups from the earlier local database remain there; switching the URI does not migrate them to Atlas. No local records were copied automatically.
+
+A local live check verified signup, actual Atlas persistence, encrypted backup round-trip, expiry/re-login, and cleanup using a temporary synthetic account. This configuration applies to this computer's backend. A hosted backend needs its own private environment variable and Atlas host access; pushing source code does not configure hosting secrets.
+
 For a single local server with the built frontend:
 
 ```sh

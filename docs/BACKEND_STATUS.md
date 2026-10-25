@@ -25,7 +25,8 @@ The account screen now includes age-group selection at signup, a direct `/login`
 | Official Postman CLI collection | **43 requests, 148 assertions, 0 failures**; both synthetic accounts deleted |
 | Production frontend build | Passed |
 | `git diff --check` | Passed |
-| Full `npm start` server with persistent local MongoDB | Started successfully at port 3000 |
+| Full `npm start` server with MongoDB Atlas | Started successfully at port 3000; authenticated Atlas database connection verified |
+| Live Atlas integration | 8 API requests passed: account persistence, encrypted backup, session expiry/re-login and cleanup; temporary synthetic account removed |
 | HTTP routes/assets | `/`, `/cloud`, `/privacy`, `/calendar`, `/ask`, manifest, worker and mark returned 200 |
 | API/static boundaries | Connected health 200; anonymous backup 401 JSON/no-store; private source/environment paths 404; same-origin request reached validation |
 
@@ -41,6 +42,6 @@ Encrypted snapshots round-trip through the API and decrypt back to the exact syn
 
 Browser visual inspection was unavailable because local browser use was disabled in Work settings. Frontend checks used React/JSDOM and automated accessibility checks.
 
-This is a completed **local backend implementation and API test run**, not a production deployment or independent security audit. Atlas configuration and a live-site update were not performed during this verification. Existing static hosting remains frontend-only; full cloud hosting needs the Node application, HTTPS and a private MongoDB URI. In-process rate limits need a shared store for multiple production instances, and hosting/database backup retention belongs to the operator.
+This is a completed **local backend implementation and API test run**, not a production deployment or independent security audit. Atlas is configured for the local backend through ignored `backend/.env`; no live-site deployment was performed. Existing static hosting remains frontend-only; hosted cloud access needs the Node application, HTTPS and a private Atlas URI in that host’s environment. In-process rate limits need a shared store for multiple production instances, and hosting/database backup retention belongs to the operator.
 
 The original no-server requirement is not literally satisfied by the combined optional-cloud version; the user explicitly chose that extension. Core account-free local behavior and the original medical safety rules remain. Independent clinical/native-Hindi review and the earlier real-device accessibility/PWA review remain outside this backend change; their existing limits are recorded in [VALIDATION.md](VALIDATION.md).
