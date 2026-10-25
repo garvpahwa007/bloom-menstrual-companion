@@ -139,3 +139,41 @@ body { background: var(--bg); color: var(--ink); }
 .art-orbit.three { background: #d7b995; }
 .art-leaf { background: #6f8190; }
 .art-orbit.two { border-color: #704b3e; }
+
+
+/* Original gentle Bloom motion, enabled only when the user has not requested reduced motion. */
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes bloom-big-breathe {
+    0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 #d7b99500; }
+    50% { transform: scale(1.12); box-shadow: 0 0 0 18px #d7b9952b; }
+  }
+  @keyframes bloom-card-rise {
+    from { opacity: 0; transform: translateY(16px) scale(.98); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  @keyframes bloom-pregnancy-burst {
+    0% { opacity: 0; transform: scale(.35) rotate(-18deg); }
+    55% { opacity: 1; transform: scale(1.2) rotate(8deg); }
+    100% { opacity: 1; transform: scale(1) rotate(0); }
+  }
+  @keyframes bloom-pregnancy-rays {
+    0% { opacity: 0; transform: scale(.3) rotate(0); }
+    35% { opacity: 1; }
+    100% { opacity: 0; transform: scale(1.9) rotate(35deg); }
+  }
+  @keyframes bloom-pregnancy-popup-in {
+    from { opacity: 0; transform: translateY(30px) scale(.78) rotate(-2deg); }
+    65% { opacity: 1; transform: translateY(-5px) scale(1.03) rotate(.5deg); }
+    to { opacity: 1; transform: translateY(0) scale(1) rotate(0); }
+  }
+  .ask-flower { animation: bloom-big-breathe 2.8s ease-in-out infinite; }
+  .ask-shell:has(.ask-processing) { animation: bloom-big-breathe 2.2s ease-in-out infinite; }
+  .welcome-logo-art { animation: bloom-big-breathe 3.2s ease-in-out infinite; }
+  .pregnancy-hero { animation: bloom-card-rise .65s ease-out both; }
+  .pregnancy-setup .lesson-icon { animation: bloom-big-breathe 2.8s ease-in-out infinite; }
+  .pregnancy-celebration { animation: bloom-card-rise .55s ease-out both, tracking-save-progress 4s ease-in-out infinite; }
+  .pregnancy-celebration::after { animation: bloom-pregnancy-rays 1.8s ease-out both; }
+  .pregnancy-celebration-burst { animation: bloom-pregnancy-burst .8s cubic-bezier(.2,.8,.2,1) both; }
+  .pregnancy-celebration-popup { animation: bloom-pregnancy-popup-in .65s cubic-bezier(.2,.8,.2,1) both; }
+  .pregnancy-celebration-popup .pregnancy-celebration-burst svg:last-child { animation: bloom-big-breathe 1.8s ease-in-out infinite; }
+}

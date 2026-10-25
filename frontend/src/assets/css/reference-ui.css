@@ -389,6 +389,27 @@ h1, h2, h3, .page-heading h1, .tracking-page-heading h1,
   .tracking-hero-caveat { font-size: .78rem; }
 }
 
+/* Blush canvas override: keep the requested pastel-pink reference visible after the base theme. */
+:root { --bg: #f2d0da; }
+body {
+  background-color: #f2d0da;
+  background-image:
+    linear-gradient(90deg, transparent 0 32.9%, #fff9 32.9% 33.25%, transparent 33.25% 66.25%, #fff9 66.25% 66.6%, transparent 66.6%),
+    linear-gradient(0deg, transparent 0 32.9%, #fff9 32.9% 33.25%, transparent 33.25% 66.25%, #fff9 66.25% 66.6%, transparent 66.6%),
+    radial-gradient(circle at 10% 8%, #fbe9eb 0 17%, transparent 36%),
+    radial-gradient(circle at 88% 22%, #f0c8d4 0 18%, transparent 39%),
+    radial-gradient(circle at 18% 88%, #eab6c7 0 18%, transparent 40%),
+    linear-gradient(135deg, #f8e1e7 0%, #f2d0da 48%, #e8afc1 100%);
+  background-attachment: fixed;
+}
+.app-shell, .app-content { background: transparent; }
+.topbar { background: rgba(255, 244, 248, .82); backdrop-filter: blur(14px); }
+.mobile-bottom { background: rgba(255, 244, 248, .94); backdrop-filter: blur(14px); }
+@media (prefers-contrast: more) {
+  body { background: #fff; background-image: none; }
+  .app-shell, .app-content, .topbar, .mobile-bottom { background: #fff; backdrop-filter: none; }
+}
+
 /* Offline conversation controls share the Ask page's readable mobile layout. */
 .chat-privacy-controls { padding: 16px 0; border-block: 1px solid var(--line); margin-block: 18px; }
 .chat-privacy-controls p { margin-block: 0 12px; }

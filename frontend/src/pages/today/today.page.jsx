@@ -8,6 +8,34 @@ import SymptomIcon from '../../components/tracking/symptom-icon.component.jsx';
 import PageHeading from '../../components/layout/page-heading.component.jsx';
 import PrivacyNote from '../../components/tracking/privacy-note.component.jsx';
 
+function PhaseAnalysis({ analysis, state, t }) {
+  if (state.profile.pregnancyEnabled) return null;
+  const cycleDay = analysis.cycleDay;
+  const cycleLength = Math.max(14, Math.round(analysis.median || 28));
+  const ovulationDay = Math.max(6, cycleLength - CONFIG.ovulationBeforePeriodDays);
+  const phaseId = analysis.phase?.id;
+  const phaseName = phaseId ? t(`tracking.phaseName.${phaseId}`) : t('tracking.phaseAnalysisUnavailable');
+  const segments = [
+    { id: 'menstrual', name: t('tracking.phaseName.menstrual'), days: 5 },
+    { id: 'beforeOvulation', name: t('tracking.phaseName.beforeOvulation'), days: Math.max(1, ovulationDay - 5) },
+    { id: 'aroundOvulation', name: t('tracking.phaseName.aroundOvulation'), days: 1 },
+    { id: 'afterOvulation', name: t('tracking.phaseName.afterOvulation'), days: Math.max(1, cycleLength - ovulationDay - 1) },
+  ];
+  const total = segments.reduce((sum, segment) => sum + segment.days, 0);
+  const marker = phaseId && cycleDay ? Math.min(98, Math.max(2, ((cycleDay - .5) / total) * 100)) : null;
+  return <section className="card phase-analysis-card" aria-labelledby="phase-analysis-title">
+    <div className="section-heading"><div><p className="eyebrow">{t('tracking.phaseAnalysisKicker')}</p><h2 id="phase-analysis-title">{t('tracking.phaseAnalysisTitle')}</h2></div><span className="phase-analysis-day">{cycleDay ? t('tracking.cycleDayNumber', { count: cycleDay }) : '—'}</span></div>
+    <div className="phase-analysis-summary"><div><p className="muted">{t('tracking.currentPhase')}</p><strong>{phaseName}</strong></div>{phaseId && <p>{t(`tracking.phase.${phaseId}`)}</p>}</div>
+    <div className="phase-timeline" role="img" aria-label={t('tracking.phaseTimelineLabel')}>
+      {segments.map(segment => <div key={segment.id} className={`phase-timeline-segment phase-${segment.id} ${phaseId === segment.id ? 'active' : ''}`} style={{ flexGrow: segment.days }}><span>{segment.name}</span></div>)}
+      {marker !== null && <span className="phase-timeline-marker" style={{ left: `${marker}%` }} aria-hidden="true"><i /></span>}
+    </div>
+    <div className="phase-analysis-legend"><span><i className="phase-dot menstrual" />{t('tracking.phaseName.menstrual')}</span><span><i className="phase-dot follicular" />{t('tracking.phaseName.beforeOvulation')}</span><span><i className="phase-dot ovulation" />{t('tracking.phaseName.aroundOvulation')}</span><span><i className="phase-dot luteal" />{t('tracking.phaseName.afterOvulation')}</span></div>
+    <div className="phase-hormone-note"><strong>{t('tracking.phaseEducationTitle')}</strong><p>{t('tracking.phaseEducationBody')}</p><div className="phase-hormone-list"><span><i className="hormone-line fsh" />{t('tracking.hormone.fsh')}</span><span><i className="hormone-line lh" />{t('tracking.hormone.lh')}</span><span><i className="hormone-line pg" />{t('tracking.hormone.pg')}</span><span><i className="hormone-line e2" />{t('tracking.hormone.e2')}</span></div></div>
+    <p className="muted phase-analysis-note">{t('tracking.phaseAnalysisNote')}</p>
+  </section>;
+}
+
 export function TodayScreen({ state, analysis, t, lang, onNavigate }) {
   const today = todayISO();
   const currentLog = state.logs[today];
@@ -28,6 +56,7 @@ export function TodayScreen({ state, analysis, t, lang, onNavigate }) {
       {!state.profile.pregnancyEnabled && <><div className="tracking-hero-estimate"><CalendarDays size={21} aria-hidden="true" /><div><span>{t('tracking.nextEstimate')}</span><strong>{analysis.prediction ? rangeText(analysis.prediction, lang) : t(analysis.suspectedGaps?.length ? 'tracking.reviewGap' : 'tracking.notEnoughData')}</strong></div>{analysis.irregular && <span className="badge tracking-irregular-badge">{t('tracking.irregular')}</span>}</div><p className="tracking-hero-caveat">{t('tracking.estimateCaveat')}</p></>}
     </section>
     {analysis.prediction?.to < today && !state.profile.pregnancyEnabled && <div className="notice"><Info size={20} /><p>{t('tracking.estimatePassed')}</p></div>}
+    <PhaseAnalysis analysis={analysis} state={state} t={t} />
     <details className="today-collapsible"><summary><span>{t('tracking.overview')}</span><ChevronDown size={19} aria-hidden="true" /></summary><div className="today-disclosure-body"><div className="grid-3 tracking-stats">
       <article className="card tracking-stat"><span className="tracking-stat-icon lilac"><CalendarDays size={20} aria-hidden="true" /></span><span className="muted">{t('tracking.averageCycle')}</span><strong>{average === null ? '—' : t('tracking.daysCount', { count: average })}</strong><small className="muted">{t('tracking.basedOnCycles', { count: recentCycles.length })}</small></article>
       <article className="card tracking-stat"><span className="tracking-stat-icon peach"><Droplets size={20} aria-hidden="true" /></span><span className="muted">{t('tracking.lastPeriod')}</span><strong>{analysis.periods?.length ? dateText(analysis.periods.at(-1).start, lang) : '—'}</strong><small className="muted">{analysis.periods?.length ? t('tracking.daysLogged', { count: analysis.periods.at(-1).length }) : t('tracking.addFirstPeriod')}</small></article>

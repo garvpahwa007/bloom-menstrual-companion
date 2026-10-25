@@ -469,6 +469,69 @@
 .tracking-hero { background: linear-gradient(112deg, #25364f 0%, #41566b 65%, #6f8190 100%); }
 .tracking-hero-button { color: #18263a; background: #f4f0e9; border-color: #f4f0e9; }
 .tracking-hero-dot { background: #d7b995; }
+/* Cycle phase analysis: calendar-based education only, never a hormone measurement. */
+.phase-analysis-card { overflow: hidden; background: linear-gradient(145deg, #fff 0%, #fbf7fc 100%); }
+.phase-analysis-card .section-heading { align-items: flex-start; }
+.phase-analysis-card h2 { margin: .25rem 0 0; }
+.phase-analysis-day { flex: 0 0 auto; padding: .45rem .7rem; border-radius: 999px; background: #f0e8f4; color: #755486; font-size: .95rem; font-weight: 650; }
+.phase-analysis-summary { display: grid; grid-template-columns: minmax(0, .85fr) minmax(0, 1.5fr); gap: 1rem; align-items: end; margin-top: 1.25rem; }
+.phase-analysis-summary p { margin: .35rem 0 0; line-height: 1.65; }
+.phase-analysis-summary strong { display: block; margin-top: .2rem; color: #624272; font-size: clamp(1.25rem, 2.2vw, 1.7rem); letter-spacing: -.035em; }
+.phase-timeline { position: relative; display: flex; gap: 3px; min-height: 112px; margin-top: 1.35rem; padding: 1.1rem .25rem .25rem; border-radius: 1rem; background: #f5f0f6; overflow: hidden; }
+.phase-timeline-segment { position: relative; display: flex; align-items: flex-end; min-width: 26px; min-height: 82px; padding: .7rem .5rem; border-radius: .8rem .8rem .25rem .25rem; color: #fff; opacity: .72; transition: opacity .2s ease, transform .2s ease; }
+.phase-timeline-segment span { width: 100%; font-size: .78rem; line-height: 1.25; text-align: center; overflow-wrap: anywhere; }
+.phase-timeline-segment.active { opacity: 1; transform: translateY(-4px); box-shadow: 0 7px 14px #5b3a6a20; }
+.phase-menstrual { background: #a34c68; }
+.phase-beforeOvulation { background: #b981a4; }
+.phase-aroundOvulation { background: #4e94a0; }
+.phase-afterOvulation { background: #4e9c8e; }
+.phase-timeline-marker { position: absolute; top: 0; z-index: 2; width: 3px; height: 100%; transform: translateX(-50%); background: #624272; box-shadow: 0 0 0 4px #ffffffaa; }
+.phase-timeline-marker i { display: block; width: 13px; height: 13px; margin: -2px 0 0 -5px; border-radius: 50%; background: #fff; border: 4px solid #755486; }
+.phase-analysis-legend { display: flex; flex-wrap: wrap; gap: .55rem 1rem; margin-top: .85rem; color: var(--muted); }
+.phase-analysis-legend span, .phase-hormone-list span { display: inline-flex; align-items: center; gap: .4rem; font-size: .9rem; }
+.phase-dot { width: 10px; height: 10px; flex: 0 0 10px; border-radius: 50%; }
+.phase-dot.menstrual { background: #a34c68; }
+.phase-dot.follicular { background: #b981a4; }
+.phase-dot.ovulation { background: #4e94a0; }
+.phase-dot.luteal { background: #4e9c8e; }
+.phase-hormone-note { margin-top: 1.2rem; padding: 1rem 1.1rem; border: 1px solid #ece4ef; border-radius: 1rem; background: #fff; }
+.phase-hormone-note strong { color: #624272; }
+.phase-hormone-note p { margin: .4rem 0 .8rem; line-height: 1.6; }
+.phase-hormone-list { display: flex; flex-wrap: wrap; gap: .55rem 1rem; }
+.hormone-line { display: inline-block; width: 22px; height: 4px; border-radius: 99px; }
+.hormone-line.fsh { background: #d5b85f; }
+.hormone-line.lh { background: #d989a3; }
+.hormone-line.pg { background: #46bfa7; }
+.hormone-line.e2 { background: #568fce; }
+.phase-analysis-note { margin: 1rem 0 0; line-height: 1.6; }
+@media (max-width: 520px) {
+  .phase-analysis-summary { grid-template-columns: minmax(0, 1fr); gap: .35rem; }
+  .phase-timeline { min-height: 128px; padding-top: 1rem; }
+  .phase-timeline-segment { min-height: 98px; padding: .55rem .25rem; }
+  .phase-timeline-segment span { font-size: .72rem; }
+  .phase-analysis-legend { gap: .45rem .75rem; }
+  .phase-hormone-note { padding: .9rem; }
+}
+
+/* Preserve the original motion while respecting OS/browser reduced-motion settings. */
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes tracking-hero-wave { 0%, 100% { transform: scale(1); opacity: .2; } 50% { transform: scale(1.12); opacity: .5; } }
+  @keyframes tracking-hero-ring { to { transform: rotate(360deg) scale(1.08); } }
+  @keyframes tracking-calendar-day-in { 0% { opacity: 0; transform: translateY(22px) scale(.78) rotate(-3deg); } 70% { opacity: 1; transform: translateY(-3px) scale(1.04) rotate(1deg); } 100% { opacity: 1; transform: translateY(0) scale(1) rotate(0); } }
+  @keyframes tracking-save-progress { 0%, 100% { background-position: 140% 0; } 50% { background-position: -40% 0; } }
+  @keyframes tracking-disclosure-open { from { opacity: 0; max-height: 0; transform: scale(.96) translateY(-12px); } to { opacity: 1; max-height: 1600px; transform: scale(1) translateY(0); } }
+  .tracking-hero::before { animation: tracking-hero-wave 5s ease-in-out infinite; }
+  .tracking-orbit-ring-one { animation: tracking-hero-ring 16s linear infinite; }
+  .tracking-orbit-ring-two { animation: tracking-hero-ring 11s linear infinite reverse; }
+  .tracking-cycle-orbit { transform: scale(1.08); transition: transform .35s ease; }
+  .tracking-hero:hover .tracking-cycle-orbit { transform: scale(1.14); }
+  .today-collapsible[open] .today-disclosure-body { animation: tracking-disclosure-open .6s cubic-bezier(.2,.8,.2,1) both; transform-origin: top center; }
+  .tracking-calendar-day { animation: tracking-calendar-day-in .6s cubic-bezier(.2,.8,.2,1) both; }
+  .tracking-calendar-day:nth-child(2n) { animation-delay: .04s; }
+  .tracking-calendar-day:nth-child(3n) { animation-delay: .08s; }
+  .tracking-calendar-day:nth-child(4n) { animation-delay: .12s; }
+  .tracking-save-bar .button[disabled] { background-image: linear-gradient(110deg, #25364f 0%, #6f8190 35%, #25364f 65%); background-size: 220% 100%; animation: tracking-save-progress 1.2s ease-in-out infinite; }
+}
 .tracking-orbit-center { color: #d7b995; }
 .tracking-orbit-small { background: #704b3e; }
 .tracking-calendar-day.logged { border-color: #853b3b; background: #f3e5e1; }
