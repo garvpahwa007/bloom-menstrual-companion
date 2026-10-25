@@ -15,7 +15,8 @@
     "build": "npm --workspace frontend run build",
     "start": "npm --workspace backend start",
     "preview": "npm --workspace frontend run start",
-    "test": "npm run test:frontend && npm run test:backend",
+    "test": "npm run test:ask && npm run test:frontend && npm run test:backend",
+    "test:ask": "node --test api/ask.test.js",
     "test:frontend": "npm --workspace frontend test",
     "test:backend": "npm --workspace backend test",
     "test:postman": "npm --workspace backend run test:postman"

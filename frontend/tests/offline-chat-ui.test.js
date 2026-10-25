@@ -330,9 +330,16 @@ for (const language of ['en', 'hi', 'ta']) {
     seed(language, { readAloud: true }); const t = translator(language);
     await mount();
     const textarea = document.querySelector('#question');
-    for (const key of ['ask.label', 'ask.useDiary', 'ask.chatGreeting', 'ask.diaryPrompt', 'ask.diarySummaryIntro']) {
+    for (const key of ['ask.label', 'ask.useDiary', 'ask.chatGreeting', 'ask.diaryPrompt', 'ask.diarySummaryIntro', 'ask.aiShare', 'ask.aiShareHelp', 'ask.aiLanguageNotice', 'ask.shareSummary', 'ask.shareSummaryHelp']) {
       assert.equal(typeof dictionaries[language][key], 'string', `${language} must define ${key} without English fallback.`);
       if (language !== 'en') assert.notEqual(dictionaries[language][key], dictionaries.en[key], `${key} should use the selected language.`);
+    }
+    if (language === 'ta') {
+      assert.equal(document.querySelector('#ask-ai-consent'), null, 'Tamil questions remain local.');
+      assert.ok(document.body.textContent.includes(t('ask.aiLanguageNotice')));
+    } else {
+      assert.ok(document.querySelector('#ask-ai-consent'), 'English and Hindi have an explicit AI consent control.');
+      assert.equal(document.querySelector('#ask-ai-consent').checked, false);
     }
     assert.ok(textarea.labels?.[0]?.textContent.includes(t('ask.label')));
     assert.equal(document.querySelector('.ask-form button[type="submit"]').getAttribute('aria-label'), t('ask.send'));
@@ -362,3 +369,45 @@ for (const language of ['en', 'hi', 'ta']) {
     assert.deepEqual(requests, []);
   });
 }
+
+test('Ask AI sharing and cycle-summary sharing are separate, off-by-default choices', async () => {
+  seed('en');
+  const t = translator('en');
+  await mount();
+  const localStorageBefore = snapshot(localStorage);
+  const sessionStorageBefore = snapshot(sessionStorage);
+  const aiConsent = document.querySelector('#ask-ai-consent');
+  assert.ok(aiConsent, 'The AI consent checkbox must be present.');
+  assert.equal(aiConsent.checked, false);
+  assert.equal(document.querySelector('#ask-cycle-consent'), null, 'Cycle-summary sharing is unavailable until question sharing is explicitly enabled.');
+  await ask('Do I have PCOS?');
+  assert.deepEqual(requests, [], 'Without consent, even a health question must not send a request.');
+
+  globalThis.fetch = async (url, options) => {
+    requests.push([url, options]);
+    return { ok: true, status: 200, json: async () => ({ answer: 'A clinician can help review this.', sourceIds: ['pcos'], consult: true, localOnly: false }) };
+  };
+  window.fetch = globalThis.fetch;
+  await click(aiConsent);
+  assert.equal(aiConsent.checked, true);
+  const summaryConsent = document.querySelector('#ask-cycle-consent');
+  assert.ok(summaryConsent);
+  assert.equal(summaryConsent.checked, false);
+  await ask('Do I have PCOS?');
+  assert.equal(requests.length, 1);
+  assert.equal(requests[0][0], '/api/ask');
+  const questionPayload = JSON.parse(requests[0][1].body);
+  assert.deepEqual(questionPayload, { question: 'Do I have PCOS?', aiConsent: true });
+
+  await click(summaryConsent);
+  assert.equal(summaryConsent.checked, true);
+  await ask('Do I have PCOS?');
+  assert.equal(requests.length, 2);
+  const summaryPayload = JSON.parse(requests[1][1].body);
+  assert.deepEqual(Object.keys(summaryPayload).sort(), ['aiConsent', 'cycleSummary', 'question', 'shareCycleSummary'].sort());
+  assert.equal(summaryPayload.shareCycleSummary, true);
+  assert.deepEqual(Object.keys(summaryPayload.cycleSummary).sort(), ['averageCycleLength', 'lastPeriodDate', 'regularity', 'symptoms'].sort());
+  assert.doesNotMatch(JSON.stringify(summaryPayload), /PRIVATE_DIARY_NOTE|PRIVATE_MEDICINE|PRIVATE|account|pin/i);
+  assert.deepEqual(snapshot(localStorage), localStorageBefore, 'Temporary AI consent and question history must not be written to application storage.');
+  assert.deepEqual(snapshot(sessionStorage), sessionStorageBefore);
+});
