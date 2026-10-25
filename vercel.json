@@ -1,1 +1,38 @@
-{"buildCommand":"npm run build","outputDirectory":"dist","headers":[{"source":"/sw.js","headers":[{"key":"Content-Type","value":"application/javascript; charset=utf-8"},{"key":"Cache-Control","value":"no-cache"}]},{"source":"/manifest.webmanifest","headers":[{"key":"Content-Type","value":"application/manifest+json; charset=utf-8"},{"key":"Cache-Control","value":"no-cache"}]}],"rewrites":[{"source":"/((?!assets/|favicon.svg|manifest\\.webmanifest|sw\\.js|bloom-mark\\.png|bloom-logo\\.png|bloom-app-192\\.png|bloom-app-512\\.png|bloom-app-maskable-512\\.png).*)","destination":"/index.html"}]}
+{
+  "buildCommand": "npm run build",
+  "outputDirectory": "frontend/dist",
+  "headers": [
+    {
+      "source": "/sw.js",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "application/javascript; charset=utf-8"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "no-cache"
+        }
+      ]
+    },
+    {
+      "source": "/manifest.webmanifest",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "application/manifest+json; charset=utf-8"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "no-cache"
+        }
+      ]
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/((?!assets/|favicon.svg|manifest\\.webmanifest|sw\\.js|bloom-mark\\.png|bloom-logo\\.png|bloom-app-192\\.png|bloom-app-512\\.png|bloom-app-maskable-512\\.png).*)",
+      "destination": "/index.html"
+    }
+  ]
+}

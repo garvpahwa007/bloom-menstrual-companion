@@ -6,3 +6,11 @@ dist/
 .openai/*.local.*
 
 .test-cache/
+
+# Private database files and generated API reports
+backend/.local-mongo/
+backend/.cache/
+backend/test-results/
+
+# Local Postman CLI logs
+.postman/
