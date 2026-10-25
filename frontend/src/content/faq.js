@@ -1090,8 +1090,8 @@ export const FAQ = [
       ]
     },
     "answer": {
-      "en": "Your logs and offline questions stay in this browser. No account is needed. Export files and printed summaries are your responsibility to store privately. External source links open only if you choose them.",
-      "hi": "आपके रिकॉर्ड और ऑफलाइन सवाल इसी ब्राउज़र में रहते हैं। अकाउंट की ज़रूरत नहीं। निर्यात फ़ाइल और प्रिंट की जानकारी सुरक्षित रखें। बाहरी स्रोत लिंक केवल आपके चुनने पर खुलते हैं।"
+      "en": "Offline chat questions and replies stay in memory on this screen and are not included in diary exports or cloud backups. Essential tracking needs no account. Your diary stays in this browser unless you explicitly save an encrypted cloud backup through an optional account. Export files and printed summaries need private storage. External source links contact that website when opened.",
+      "hi": "ऑफ़लाइन सवाल और जवाब केवल इस स्क्रीन की मेमोरी में रहते हैं; डायरी के निर्यात या क्लाउड बैकअप में शामिल नहीं होते। ज़रूरी ट्रैकिंग के लिए खाता नहीं चाहिए। वैकल्पिक खाते से अपनी इच्छा से एन्क्रिप्टेड क्लाउड बैकअप सहेजने तक डायरी इसी ब्राउज़र में रहती है। निर्यात फ़ाइल और प्रिंट सुरक्षित रखें। स्रोत का लिंक खोलने पर उस वेबसाइट से संपर्क होता है।"
     },
     "sourceIds": [],
     "consult": false

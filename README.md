@@ -66,7 +66,7 @@ With MongoDB running, `npm start` serves the built app and API at port 3000. For
 | When to see a doctor | Calm cards describing relevant logged dates, why a check may help and care options. |
 | Prepare for my visit | Full-history cycles, symptom counts and rated-day intensity aggregates, pain and medicines, with a compact one-page PDF, complete summary JSON and print support. |
 | Learn | Seven bilingual lessons, including PCOS/PCOD and first periods, with instructional diagrams and paragraph-level source attribution. |
-| Ask | A local question matcher with 41 English/Hindi answers and a clear unknown-answer fallback. |
+| Ask | An offline chatbot with 41 sourced English/Hindi answers, greetings, related questions, bounded safety follow-ups and an optional diary summary calculated on the device. |
 | Reminders | Optional check-ins and period estimates; custom/medicine reminders can repeat once, daily or on selected weekdays; dated check-up reminder. |
 | Pregnancy | Confirmation-gated mode, estimated weeks/due date, 42 individual sourced week cards, warning signs and a check-up reminder flow. |
 | Privacy & Data | Local-storage and PIN status, JSON backup download, CSV export, validated JSON/CSV restore and confirmed deletion. |
@@ -154,7 +154,7 @@ These static hosting settings publish local tracking only; Cloud Backup reports 
 
 ## Simulated, limited and next
 
-The demo profile is synthetic and generated relative to the device date. Predictions and pattern cards are exploratory summaries, not clinical validation. Ask is a sourced local matcher with 41 bilingual answers, **not a live AI model**.
+The demo profile is synthetic and generated relative to the device date. Predictions and pattern cards are exploratory summaries, not clinical validation. Ask is an offline chatbot built around 41 sourced bilingual answers, **not a generative AI model**. It adds greetings, related questions and cautious safety checks on explicit follow-ups. A diary-summary switch starts off; enabling it calculates a small summary locally without private notes or account details. Questions/replies stay in screen memory and are excluded from both exports and encrypted cloud backups. See [OFFLINE_CHATBOT.md](docs/OFFLINE_CHATBOT.md).
 
 Pregnancy education has 42 separately authored weekly cards. Weeks 4–41 use the corresponding NHS week guides; weeks 1–3 use NHS Wales’ early-pregnancy information, and week 42 uses NHS overdue-pregnancy guidance. These describe typical stages and care topics, not an individual baby’s confirmed development or a prescribed local appointment schedule.
 
