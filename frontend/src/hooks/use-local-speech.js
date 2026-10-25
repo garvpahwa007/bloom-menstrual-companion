@@ -4,7 +4,7 @@ export function useLocalSpeech(lang) {
   const [voice, setVoice] = useState(null); const [speaking, setSpeaking] = useState(false);
   useEffect(() => {
     if (!('speechSynthesis' in window)) return;
-    const update = () => setVoice(speechSynthesis.getVoices().find(v => v.localService && v.lang.toLowerCase().startsWith(lang === 'hi' ? 'hi' : 'en')) || null);
+    const update = () => setVoice(speechSynthesis.getVoices().find(v => v.localService && v.lang.toLowerCase().startsWith(lang === 'hi' ? 'hi' : lang === 'ta' ? 'ta' : 'en')) || null);
     update(); speechSynthesis.addEventListener('voiceschanged', update);
     return () => { speechSynthesis.cancel(); speechSynthesis.removeEventListener('voiceschanged', update); };
   }, [lang]);

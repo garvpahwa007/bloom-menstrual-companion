@@ -7,7 +7,7 @@ import { build } from 'esbuild';
 import { JSDOM, VirtualConsole } from 'jsdom';
 import React, { act } from 'react';
 import { createDemoData } from '../src/data/demo.js';
-import { translator } from '../src/i18n/index.js';
+import { dictionaries, translator } from '../src/i18n/index.js';
 import { FAQ } from '../src/content/faq.js';
 import { SOURCES } from '../src/content/sources.js';
 import { answerQuestion } from '../src/pages/ask/ask.service.js';
@@ -57,6 +57,7 @@ const originalFetch = globalThis.fetch;
 const originalCreateURL = URL.createObjectURL;
 const originalRevokeURL = URL.revokeObjectURL;
 const originalAnchorClick = window.HTMLAnchorElement.prototype.click;
+const greetings = { en: 'Hello', hi: 'नमस्ते', ta: 'வணக்கம்' };
 let root;
 let requests;
 let downloads;
@@ -79,10 +80,11 @@ async function click(node) {
 
 async function setValue(node, value) {
   assert.ok(node, 'Expected an editable form field.');
-  const prototype = node.tagName === 'TEXTAREA' ? window.HTMLTextAreaElement.prototype : window.HTMLInputElement.prototype;
+  const prototype = node.tagName === 'TEXTAREA' ? window.HTMLTextAreaElement.prototype : node.tagName === 'SELECT' ? window.HTMLSelectElement.prototype : window.HTMLInputElement.prototype;
   await act(async () => {
     Object.getOwnPropertyDescriptor(prototype, 'value').set.call(node, value);
     node.dispatchEvent(new Event('input', { bubbles: true }));
+    if (node.tagName === 'SELECT') node.dispatchEvent(new Event('change', { bubbles: true }));
   });
 }
 
@@ -111,6 +113,17 @@ async function navigate(path) {
   assert.ok(link, `Expected the application's ${path} navigation link.`);
   await click(link);
   assert.equal(window.location.pathname, path);
+}
+
+async function changeLanguage(language) {
+  const select = [...document.querySelectorAll('header select')].find(node => [...node.options].some(option => option.value === language));
+  if (select) await setValue(select, language);
+  else {
+    for (let attempt = 0; attempt < 3 && document.documentElement.lang !== language; attempt++) {
+      await click(document.querySelector('header .language-button'));
+    }
+  }
+  await waitFor(() => document.documentElement.lang === language, 'The real language setting must update the App.');
 }
 
 async function ask(value, language = 'en') {
@@ -149,7 +162,7 @@ beforeEach(() => {
   document.documentElement.lang = 'en'; runtimeErrors.length = 0;
   requests = []; downloads = []; objectURLs = new Map();
   denyNetwork();
-  speech = { spoken: [], cancellations: 0, getVoices: () => [{ localService: true, lang: 'en-IN' }, { localService: true, lang: 'hi-IN' }], addEventListener() {}, removeEventListener() {}, cancel() { this.cancellations++; }, speak(utterance) { this.spoken.push(utterance); } };
+  speech = { spoken: [], cancellations: 0, getVoices: () => [{ localService: true, lang: 'en-IN' }, { localService: true, lang: 'hi-IN' }, { localService: true, lang: 'ta-IN' }], addEventListener() {}, removeEventListener() {}, cancel() { this.cancellations++; }, speak(utterance) { this.spoken.push(utterance); } };
   Object.defineProperty(globalThis, 'speechSynthesis', { configurable: true, value: speech });
   Object.defineProperty(window, 'speechSynthesis', { configurable: true, value: speech });
   const Utterance = class { constructor(text) { this.text = text; } };
@@ -248,30 +261,32 @@ test('offline chat: conversation supports greetings, sourced related questions a
   assert.deepEqual(requests, []);
 });
 
-test('offline chat: diary summaries require temporary consent and revoking it removes diary turns', async () => {
-  seed(); const t = translator('en');
-  const before = snapshot(localStorage);
-  await mount();
-  assert.equal(diaryConsent().checked, false, 'Diary use must start off.');
-  await ask(t('ask.diaryPrompt'));
-  assert.ok(lastAnswer().textContent.includes(t('ask.diaryOptIn')));
-  assert.equal(lastAnswer().getAttribute('data-diary-summary'), null);
-  await click(diaryConsent());
-  assert.equal(diaryConsent().checked, true);
-  await click(findButton(t('ask.diaryPrompt')));
-  assert.equal(lastAnswer().getAttribute('data-diary-summary'), 'true');
-  assert.ok(lastAnswer().textContent.includes(t('ask.diarySummaryIntro')), 'Consent allows a computed diary summary.');
-  assert.equal(document.querySelector('.messages').textContent.includes('PRIVATE_DIARY_NOTE'), false);
-  assert.equal(document.querySelector('.messages').textContent.includes('PRIVATE_MEDICINE'), false);
-  await click(diaryConsent());
-  assert.equal(diaryConsent().checked, false);
-  assert.equal(document.querySelector('.messages [data-diary-summary="true"]'), null, 'Revoking consent must remove the diary-derived response from the current thread.');
-  await ask('Hello');
-  assert.ok(lastAnswer().textContent.includes(t('ask.chatGreeting')));
-  assert.deepEqual(snapshot(localStorage), before, 'Consent and derived summaries must remain in component memory.');
-  assert.deepEqual(snapshot(sessionStorage), {});
-  assert.deepEqual(requests, []);
-});
+for (const language of ['en', 'hi', 'ta']) {
+  test(`offline chat: ${language} diary summaries require temporary consent and revoking it removes diary turns`, async () => {
+    seed(language); const t = translator(language);
+    const before = snapshot(localStorage);
+    await mount();
+    assert.equal(diaryConsent(language).checked, false, 'Diary use must start off.');
+    await ask(t('ask.diaryPrompt'), language);
+    assert.ok(lastAnswer().textContent.includes(t('ask.diaryOptIn')));
+    assert.equal(lastAnswer().getAttribute('data-diary-summary'), null);
+    await click(diaryConsent(language));
+    assert.equal(diaryConsent(language).checked, true);
+    await click(findButton(t('ask.diaryPrompt')));
+    assert.equal(lastAnswer().getAttribute('data-diary-summary'), 'true');
+    assert.ok(lastAnswer().textContent.includes(t('ask.diarySummaryIntro')), 'Consent allows a computed diary summary in the selected language.');
+    assert.equal(document.querySelector('.messages').textContent.includes('PRIVATE_DIARY_NOTE'), false);
+    assert.equal(document.querySelector('.messages').textContent.includes('PRIVATE_MEDICINE'), false);
+    await click(diaryConsent(language));
+    assert.equal(diaryConsent(language).checked, false);
+    assert.equal(document.querySelector('.messages [data-diary-summary="true"]'), null, 'Revoking consent must remove the diary-derived response from the current thread.');
+    await ask(greetings[language], language);
+    assert.ok(lastAnswer().textContent.includes(t('ask.chatGreeting')));
+    assert.deepEqual(snapshot(localStorage), before, 'Consent and derived summaries must remain in component memory.');
+    assert.deepEqual(snapshot(sessionStorage), {});
+    assert.deepEqual(requests, []);
+  });
+}
 
 test('offline chat: clear, reload and changing language erase RAM conversation, consent and local speech', async () => {
   seed('en', { readAloud: true });
@@ -300,8 +315,7 @@ test('offline chat: clear, reload and changing language erase RAM conversation, 
   await click(diaryConsent());
   await setValue(document.querySelector('#question'), 'PRIVATE_DRAFT_SENTINEL');
   const beforeLanguage = speech.cancellations;
-  await click(document.querySelector('.language-button'));
-  await waitFor(() => document.documentElement.lang === 'hi', 'The real language setting must update the App.');
+  await changeLanguage('hi');
   assert.equal(answers().length, 0, 'Language changes must clear the conversation instead of reusing stale-language answers.');
   assert.equal(document.querySelector('#question').value, '');
   assert.equal(diaryConsent('hi').checked, false);
@@ -311,17 +325,28 @@ test('offline chat: clear, reload and changing language erase RAM conversation, 
   assert.deepEqual(requests, []);
 });
 
-for (const language of ['en', 'hi']) {
+for (const language of ['en', 'hi', 'ta']) {
   test(`offline chat: populated ${language} thread and diary controls have translated accessible semantics`, async () => {
-    seed(language); const t = translator(language);
+    seed(language, { readAloud: true }); const t = translator(language);
     await mount();
     const textarea = document.querySelector('#question');
+    for (const key of ['ask.label', 'ask.useDiary', 'ask.chatGreeting', 'ask.diaryPrompt', 'ask.diarySummaryIntro']) {
+      assert.equal(typeof dictionaries[language][key], 'string', `${language} must define ${key} without English fallback.`);
+      if (language !== 'en') assert.notEqual(dictionaries[language][key], dictionaries.en[key], `${key} should use the selected language.`);
+    }
     assert.ok(textarea.labels?.[0]?.textContent.includes(t('ask.label')));
     assert.equal(document.querySelector('.ask-form button[type="submit"]').getAttribute('aria-label'), t('ask.send'));
     diaryConsent(language);
-    await ask(language === 'hi' ? 'नमस्ते' : 'Hello', language);
+    await ask(greetings[language], language);
     assert.ok(lastAnswer().textContent.includes(t('ask.chatGreeting')));
-    await ask(FAQ.find(item => item.id === 'pcos').question[language], language);
+    const pcos = FAQ.find(item => item.id === 'pcos');
+    await ask(pcos.question[language], language);
+    assert.ok(lastAnswer().textContent.includes(pcos.answer[language]), 'The FAQ response must use the selected language.');
+    assert.ok(lastAnswer().querySelector(`.sources a[href="${SOURCES.pcos.url}"]`));
+    assert.equal(speech.spoken.at(-1)?.lang, `${language}-IN`, 'Read-aloud must select a local voice for the current language.');
+    await click(diaryConsent(language));
+    await click(findButton(t('ask.diaryPrompt')));
+    assert.equal(lastAnswer().getAttribute('data-diary-summary'), 'true');
     const thread = document.querySelector('.messages');
     assert.equal(thread.getAttribute('role'), 'log');
     assert.equal(thread.getAttribute('aria-live'), 'polite');

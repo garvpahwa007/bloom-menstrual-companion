@@ -83,7 +83,7 @@ export function validateState(input) {
     return check.getFullYear() === y && check.getMonth() === m - 1 && check.getDate() === d;
   };
   if (!object(input) || input.version !== 1 || !object(input.logs) || !object(input.profile) || !object(input.settings) || !Array.isArray(input.reminders)) invalid();
-  if (!['en', 'hi'].includes(input.settings.language) || !['adult', 'under18'].includes(input.profile.ageGroup)) throw new Error('invalidImport');
+  if (!['en', 'hi', 'ta'].includes(input.settings.language) || !['adult', 'under18'].includes(input.profile.ageGroup)) throw new Error('invalidImport');
   for (const key of ['pregnancyEnabled', 'pregnancyConfirmed', 'fertilityEnabled', 'pregnancyFeatureEnabled']) if (key in input.profile && typeof input.profile[key] !== 'boolean') invalid();
   if (input.profile.lastPeriodDate && !validDate(input.profile.lastPeriodDate)) invalid();
   if (input.profile.pregnancyEnabled && (!input.profile.pregnancyConfirmed || !validDate(input.profile.lastPeriodDate) || input.profile.lastPeriodDate > todayISO())) invalid();

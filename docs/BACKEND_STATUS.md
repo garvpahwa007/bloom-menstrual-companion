@@ -1,6 +1,6 @@
 # Backend progress and verification
 
-Verified locally on **25 October 2026**, using Node.js 24.14.1, npm 11.11.0, MongoDB 8.0.17 and Postman CLI 1.76.0. The earlier backend/refactor is merged into `main`. The age-group signup and returning-login update is prepared on `feature/signup-age-relogin` for review.
+Verified locally on **25 October 2026**, using Node.js 24.14.1, npm 11.11.0, MongoDB 8.0.17 and Postman CLI 1.76.0. The backend and signup updates are merged into `main`. The current offline-chatbot update is on `feature/offline-chatbot`; see [OFFLINE_CHATBOT.md](OFFLINE_CHATBOT.md) for its validation and privacy boundary.
 
 | Step | Status | Delivered |
 | --- | --- | --- |
@@ -10,7 +10,7 @@ Verified locally on **25 October 2026**, using Node.js 24.14.1, npm 11.11.0, Mon
 | 4. Add private server persistence | Complete | One browser-encrypted snapshot per account; revision checks, ownership, backup deletion and account cleanup |
 | 5. Connect React | Complete | English/Hindi cloud UI, explicit uploads, fresh-device restore with confirmation, locked-diary protection, deletion and recoverable errors |
 | 6. Test the APIs in Postman | Complete | Importable collection/environment and official local CLI runner; 43 requests and 148 assertions passed |
-| 7. Verify safety and regression behavior | Complete | 223 frontend tests and 17 backend tests passed; build, clean install and whitespace checks passed |
+| 7. Verify safety and regression behavior | Complete | 265 frontend tests and 17 backend tests passed; build, clean install and whitespace checks passed |
 | 8. Document and package the source | Complete | Setup, endpoint reference, testing instructions and updated privacy descriptions |
 
 The account screen now includes age-group selection at signup, a direct `/login` entry, and a returning-user flow after session expiry. Age remains in the diary/encrypted snapshot; aliases persist in MongoDB.
@@ -20,7 +20,7 @@ The account screen now includes age-group selection at signup, a direct `/login`
 | Check | Result |
 | --- | --- |
 | Clean `npm ci` | Passed; audit reported zero known vulnerabilities at verification time |
-| Frontend tests | **223 passed, 0 failed, 0 skipped** |
+| Frontend tests | **265 passed, 0 failed, 0 skipped** |
 | Backend HTTP/MongoDB/security tests | **17 passed, 0 failed, 0 skipped**, including parent test groups |
 | Official Postman CLI collection | **43 requests, 148 assertions, 0 failures**; both synthetic accounts deleted |
 | Production frontend build | Passed |

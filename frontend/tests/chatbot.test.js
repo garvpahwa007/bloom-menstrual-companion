@@ -40,8 +40,8 @@ function freeze(value) {
   return value;
 }
 
-test('offline chat retains every established bilingual FAQ answer and source verbatim', () => {
-  for (const language of ['en', 'hi']) for (const faq of FAQ) {
+test('offline chat retains every established English, Hindi and Tamil FAQ answer and source verbatim', () => {
+  for (const language of ['en', 'hi', 'ta']) for (const faq of FAQ) {
     const expected = answerQuestion(faq.question[language], language);
     const answer = answerOfflineChat(faq.question[language], { language });
     assert.equal(answer.id, expected.id, `${language}: ${faq.id}`);
@@ -67,13 +67,19 @@ const safetyCases = [
   ['पेट में अचानक तेज दर्द है', 'hi', 'urgent'],
   ['मुझे खुद को नुकसान पहुँचाने का मन है', 'hi', 'selfHarm'],
   ['मैं बहुत उदास हूँ', 'hi', 'support'],
+  ['எனக்கு கர்ப்பம் இருக்கலாம் மற்றும் இரத்தப்போக்கு உள்ளது', 'ta', 'urgent'],
+  ['எனக்கு கர்ப்பம் இருக்கலாம் மற்றும் கடுமையான வலி உள்ளது', 'ta', 'urgent'],
+  ['I feel like hurting myself', 'ta', 'selfHarm'],
 ];
 for (const [question, language, safety] of safetyCases) {
   test(`offline safety: ${question}`, () => {
     const expected = answerQuestion(question, language);
-    const answer = answerOfflineChat(`Summarise my diary. ${question}`, { language, useDiary: true, state: createDemoData() });
+    const prompt = language === 'ta' ? 'என் நாட்குறிப்பின் சுருக்கத்தைக் காட்டு' : 'Summarise my diary';
+    const answer = answerOfflineChat(`${prompt}. ${question}`, { language, useDiary: true, state: createDemoData() });
     assert.equal(answer.safety, safety);
+    assert.equal(typeof answer.text, 'string');
     assert.equal(answer.text, expected.text);
+    if (language === 'ta') assert.match(answer.text, /[\u0b80-\u0bff]/);
     assert.deepEqual(answer.sourceIds, expected.sourceIds);
     assert.equal(answer.usedDiary, false);
     assertCanonical(answer);
@@ -88,13 +94,56 @@ test('explicit immediate followups combine only for established urgent safety ro
     ['I have severe pain', 'And painkillers have not helped', 'en'],
     ['बहुत खून आ रहा है', 'अब चक्कर भी आ रहे हैं', 'hi'],
     ['मैं गर्भवती हो सकती हूँ', 'और हल्का खून आ रहा है', 'hi'],
+    ['எனக்கு கர்ப்பம் இருக்கலாம்', 'மேலும் எனக்கு இரத்தப்போக்கு உள்ளது', 'ta'],
+    ['எனக்கு இரத்தப்போக்கு உள்ளது', 'இப்போது எனக்கு கர்ப்பம் இருக்கலாம்', 'ta'],
+    ['எனக்கு கர்ப்பம் இருக்கலாம்', 'இன்னும் கடுமையான வலி உள்ளது', 'ta'],
+    ['எனக்கு கர்ப்பம் இருக்கலாம்', 'எனக்கு இரத்தப்போக்கு கூட உள்ளது', 'ta'],
+    ['எனக்கு அதிக இரத்தப்போக்கு உள்ளது', 'மேலும் எனக்கு தலைச்சுற்றல் உள்ளது', 'ta'],
+    ['எனக்கு கடுமையான வலி உள்ளது', 'இன்னும் நிவாரணம் இல்லை', 'ta'],
+    ['எனக்கு கர்ப்பம் இருக்கலாம்', 'மேலும் எனக்கு ரத்தம் வருகிறது', 'ta'],
   ];
   for (const [previousQuestion, question, language] of cases) {
     const answer = answerOfflineChat(question, { previousQuestion, language });
     assert.equal(answer.safety, 'urgent', `${previousQuestion} → ${question}`);
     assert.equal(answer.text, answerQuestion(`${previousQuestion}\n${question}`, language).text);
+    if (language === 'ta') assert.match(answer.text, /[\u0b80-\u0bff]/);
     assert.equal(answer.usedDiary, false);
     assertCanonical(answer);
+  }
+});
+
+test('educational prior topics never become reported symptoms while personal prior concerns remain eligible', () => {
+  for (const [previousQuestion, question, language] of [
+    ['What is heavy bleeding?', 'I also feel dizzy', 'en'],
+    ['What is pregnancy?', 'And I have bleeding', 'en'],
+    ['How to log heavy bleeding?', 'I also feel dizzy', 'en'],
+    ['बहुत खून बहना क्या होता है?', 'मुझे चक्कर भी आ रहे हैं', 'hi'],
+    ['गर्भावस्था क्या है?', 'और मुझे खून आ रहा है', 'hi'],
+    ['बहुत खून कैसे दर्ज करें?', 'मुझे चक्कर भी आ रहे हैं', 'hi'],
+    ['கர்ப்பம் என்றால் என்ன?', 'மேலும் எனக்கு இரத்தப்போக்கு உள்ளது', 'ta'],
+    ['அதிக இரத்தப்போக்கு பற்றி விளக்கவும்', 'மேலும் எனக்கு தலைச்சுற்றல் உள்ளது', 'ta'],
+  ]) {
+    const answer = answerOfflineChat(question, { previousQuestion, language });
+    const current = answerOfflineChat(question, { language });
+    assert.notEqual(answer.safety, 'urgent', `${previousQuestion} → ${question}`);
+    assert.equal(answer.id, current.id);
+    assert.equal(answer.text, current.text);
+  }
+  for (const [previousQuestion, question, language] of [
+    ['Why am I bleeding heavily?', 'I also feel dizzy', 'en'],
+    ['Could I be pregnant?', 'And I have bleeding', 'en'],
+    ['मुझे बहुत खून क्यों आ रहा है?', 'मुझे चक्कर भी आ रहे हैं', 'hi'],
+    ['क्या मैं गर्भवती हो सकती हूँ?', 'और मुझे खून आ रहा है', 'hi'],
+    ['நான் கர்ப்பமாக இருக்கலாமா?', 'மேலும் எனக்கு இரத்தப்போக்கு உள்ளது', 'ta'],
+    ['எனக்கு ஏன் இரத்தப்போக்கு ஏற்படுகிறது?', 'இப்போது எனக்கு கர்ப்பம் இருக்கலாம்', 'ta'],
+  ]) {
+    assert.equal(answerOfflineChat(question, { previousQuestion, language }).safety, 'urgent', `${previousQuestion} → ${question}`);
+  }
+  for (const language of ['en', 'hi', 'ta']) {
+    const question = 'I have very heavy bleeding and feel dizzy';
+    const answer = answerOfflineChat(question, { previousQuestion: 'What is pregnancy?', language });
+    assert.equal(answer.safety, 'urgent');
+    assert.equal(answer.text, answerQuestion(question, language).text);
   }
 });
 
@@ -113,9 +162,19 @@ test('previous danger cannot contaminate unrelated topics, greetings, or noncont
   assert.equal(answerOfflineChat('Also, I feel like hurting myself', { previousQuestion }).safety, 'selfHarm');
   assert.equal(answerOfflineChat('Also I feel very low', { previousQuestion }).safety, 'support');
   assert.equal(answerOfflineChat('Also I feel dizzy', { previousQuestion: 'I want to die' }).safety, null);
+  for (const question of [
+    'வணக்கம்', 'நன்றி', 'மேலும் ஏன் இரத்தப்போக்கு ஏற்படுகிறது?', 'இப்போது எப்படி கர்ப்பம் உறுதிப்படுத்தப்படுகிறது?',
+    'இன்னும் எப்போது கடுமையான வலி பற்றி மருத்துவரிடம் பேச வேண்டும்?', 'மேலும் என்ன கர்ப்பப் பயன்முறை?',
+    'இப்போது பேட்டை எப்படி பயன்படுத்துவது?', 'மேலும் எப்படிக் கர்ப்பம் உறுதிப்படுத்தப்படுகிறது?',
+    'இப்போது எப்படிப் கர்ப்பம் உறுதிப்படுத்தப்படுகிறது?', 'இரத்தப்போக்கு பற்றிய கூடுதல் தகவல் வேண்டும்',
+  ]) {
+    const answer = answerOfflineChat(question, { previousQuestion, language: 'ta' });
+    assert.notEqual(answer.safety, 'urgent', question);
+    assert.equal(answer.id, answerOfflineChat(question, { language: 'ta' }).id);
+  }
 });
 
-test('greeting, thanks and help are bilingual nonmedical replies', () => {
+test('greeting, thanks and help are localized nonmedical replies in all three languages', () => {
   for (const [question, language, id, key] of [
     ['Hello!', 'en', 'greeting', 'ask.chatGreeting'],
     ['नमस्ते', 'hi', 'greeting', 'ask.chatGreeting'],
@@ -123,12 +182,16 @@ test('greeting, thanks and help are bilingual nonmedical replies', () => {
     ['शुक्रिया', 'hi', 'thanks', 'ask.chatThanks'],
     ['What can you do?', 'en', 'help', 'ask.chatHelp'],
     ['मदद करें', 'hi', 'help', 'ask.chatHelp'],
+    ['வணக்கம்', 'ta', 'greeting', 'ask.chatGreeting'],
+    ['நன்றி', 'ta', 'thanks', 'ask.chatThanks'],
+    ['உதவி', 'ta', 'help', 'ask.chatHelp'],
   ]) {
     const answer = answerOfflineChat(question, { language });
     assert.equal(answer.id, id);
     assert.equal(answer.text, translator(language)(key));
     assert.notEqual(answer.text, key, `Translation ${key} must exist`);
     if (language === 'hi') assert.match(answer.text, /[\u0900-\u097f]/);
+    if (language === 'ta') assert.match(answer.text, /[\u0b80-\u0bff]/);
     assert.equal(answer.consult, false);
     assert.equal(answer.safety, null);
     assert.deepEqual(answer.sourceIds, []);
@@ -155,7 +218,8 @@ test('diary summaries require explicit opt-in and do not touch diary state while
   const state = new Proxy({}, { get() { throw new Error('Diary must not be read'); } });
   for (const [question, language] of [
     ['my cycle', 'en'], ['My period history', 'en'], ['Summarise my diary', 'en'],
-    ['Summarize my cycle length', 'en'], ['मेरी डायरी का सारांश दिखाओ', 'hi'], ['मेरी डायरी', 'hi'],
+    ['Summarize my cycle length', 'en'], ['मेरी डायरी का सारांश दिखाओ', 'hi'], ['मेरी डायरी', 'hi'], [translator('hi')('ask.diaryPrompt'), 'hi'],
+    ['என் நாட்குறிப்பு', 'ta'], ['என் சுழற்சி', 'ta'], ['என் நாட்குறிப்பின் சுருக்கத்தைக் காட்டு', 'ta'],
   ]) {
     const answer = answerOfflineChat(question, { state, language });
     assert.equal(answer.id, 'diaryOptIn', question);
@@ -210,11 +274,34 @@ test('summary count and average use the same recent-cycle window when history ha
 
 test('diary summary is Hindi when selected', () => {
   const { state, starts } = makeState([28, 28, 28]);
-  const answer = answerOfflineChat('मेरी डायरी का सारांश बताओ', { state, useDiary: true, language: 'hi' });
+  const answer = answerOfflineChat(translator('hi')('ask.diaryPrompt'), { state, useDiary: true, language: 'hi' });
   assert.equal(answer.id, 'diarySummary');
   assert.match(answer.text, /[\u0900-\u097f]/);
   assert.ok(answer.text.includes(formatDate(starts.at(-1), 'hi', { year: 'numeric' })));
   assert.doesNotMatch(answer.text, /ask\.[A-Za-z]|\{(?:date|count|days|from|to)\}/);
+});
+
+test('Tamil diary summary uses localized copy, ta-IN dates and numbers with explicit opt-in', () => {
+  const { state, starts, today } = makeState([27, 29, 28, 28]);
+  const tamil = translator('ta');
+  assert.equal(tamil('ask.diaryPrompt'), 'என் நாட்குறிப்பின் சுருக்கத்தைக் காட்டு');
+  assert.equal(answerOfflineChat(tamil('ask.diaryPrompt'), { state, language: 'ta' }).id, 'diaryOptIn');
+  const answer = answerOfflineChat(tamil('ask.diaryPrompt'), { state, useDiary: true, language: 'ta' });
+  const analysis = analyzeCycles(state.logs, { today, fertilityEnabled: false });
+  const tamilNumber = value => new Intl.NumberFormat('ta-IN', { maximumFractionDigits: 1 }).format(value);
+  assert.equal(answer.id, 'diarySummary');
+  assert.equal(answer.usedDiary, true);
+  assert.match(answer.text, /[\u0b80-\u0bff]/);
+  assert.ok(answer.text.startsWith(tamil('ask.diarySummaryIntro')));
+  assert.ok(answer.text.includes(tamil('ask.diaryLastPeriod', { date: formatDate(starts.at(-1), 'ta', { year: 'numeric' }) })));
+  assert.ok(answer.text.includes(tamil('ask.diaryCompleteCycles', { count: tamilNumber(analysis.recentCycles.length) })));
+  assert.ok(answer.text.includes(tamil('ask.diaryAverageCycle', { days: tamilNumber(analysis.average) })));
+  assert.ok(answer.text.includes(tamil('ask.diaryEstimate', {
+    from: formatDate(analysis.prediction.from, 'ta', { year: 'numeric' }),
+    to: formatDate(analysis.prediction.to, 'ta', { year: 'numeric' }),
+  })));
+  assert.doesNotMatch(answer.text, /ask\.[A-Za-z]|\{(?:date|count|days|from|to)\}/);
+  assertCanonical(answer);
 });
 
 test('summary never reads or exposes notes, medicines, identity, PIN, DOB or unrelated profile fields', () => {

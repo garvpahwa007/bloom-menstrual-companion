@@ -26,7 +26,7 @@ export function formatDate(value, language = 'en', options = {}) {
   if (!value) return '';
   ordinal(value);
   const [year, month, day] = value.split('-').map(Number);
-  return new Intl.DateTimeFormat(language === 'hi' ? 'hi-IN' : 'en-IN', { day: 'numeric', month: 'short', ...options }).format(new Date(year, month - 1, day, 12));
+  return new Intl.DateTimeFormat(language === 'hi' ? 'hi-IN' : language === 'ta' ? 'ta-IN' : 'en-IN', { day: 'numeric', month: 'short', ...options }).format(new Date(year, month - 1, day, 12));
 }
 
 export function monthLabel(value, language = 'en') {

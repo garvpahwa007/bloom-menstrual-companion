@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import en from '../src/i18n/en.js';
 import hi from '../src/i18n/hi.js';
+import ta from '../src/i18n/ta.js';
 import { translator } from '../src/i18n/index.js';
 import { SYMPTOMS } from '../src/constants/symptom.constant.js';
 import { RED_FLAGS } from '../src/constants/redflag.constant.js';
@@ -26,13 +27,16 @@ const bilingual = (value, label) => {
   assert.match(value.hi, /[\u0900-\u097f]/, `${label} needs Hindi prose`);
 };
 
-test('English and Hindi dictionaries have identical, nonempty keys and matching placeholders', () => {
+test('English, Hindi and Tamil provide every interface key with matching placeholders', () => {
   assert.deepEqual(Object.keys(en).sort(), Object.keys(hi).sort());
   for (const key of Object.keys(en)) {
     assert.equal(typeof en[key], 'string', `${key} English must be text`);
     assert.equal(typeof hi[key], 'string', `${key} Hindi must be text`);
     assert.ok(en[key].trim() && hi[key].trim(), `${key} cannot be blank`);
-    assert.deepEqual(placeholders(en[key]), placeholders(hi[key]), `${key} interpolation differs`);
+    assert.deepEqual(placeholders(en[key]), placeholders(hi[key]), `${key} Hindi interpolation differs`);
+    assert.equal(typeof ta[key], 'string', `${key} Tamil must be text`);
+    assert.ok(ta[key].trim(), `${key} Tamil cannot be blank`);
+    assert.deepEqual(placeholders(en[key]), placeholders(ta[key]), `${key} Tamil interpolation differs`);
   }
 });
 

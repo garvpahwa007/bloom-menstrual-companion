@@ -44,12 +44,12 @@ function nonmedical(id, key, t, options) {
   return canonical({ id, text: t(key), sourceIds: [], consult: false }, options);
 }
 
-const greetings = new Set(['hi', 'hello', 'hey', 'hello there', 'hi there', 'good morning', 'good evening', 'namaste', 'नमस्ते', 'नमस्कार', 'हेलो', 'हैलो']);
-const thanks = new Set(['thanks', 'thank you', 'thank you so much', 'thanks a lot', 'धन्यवाद', 'शुक्रिया', 'बहुत धन्यवाद']);
-const helpRequests = new Set(['help', 'help me', 'can you help', 'can you help me', 'what can you do', 'how can you help', 'what can i ask', 'मदद', 'मदद करो', 'मदद करें', 'मेरी मदद करो', 'मेरी मदद करें', 'तुम क्या कर सकते हो', 'आप क्या कर सकते हैं', 'क्या पूछ सकती हूँ', 'क्या पूछ सकता हूँ']);
+const greetings = new Set(['hi', 'hello', 'hey', 'hello there', 'hi there', 'good morning', 'good evening', 'namaste', 'नमस्ते', 'नमस्कार', 'हेलो', 'हैलो', 'வணக்கம்']);
+const thanks = new Set(['thanks', 'thank you', 'thank you so much', 'thanks a lot', 'धन्यवाद', 'शुक्रिया', 'बहुत धन्यवाद', 'நன்றி']);
+const helpRequests = new Set(['help', 'help me', 'can you help', 'can you help me', 'what can you do', 'how can you help', 'what can i ask', 'मदद', 'मदद करो', 'मदद करें', 'मेरी मदद करो', 'मेरी मदद करें', 'तुम क्या कर सकते हो', 'आप क्या कर सकते हैं', 'क्या पूछ सकती हूँ', 'क्या पूछ सकता हूँ', 'உதவி']);
 
 function isDiaryRequest(input) {
-  if (/^(?:please )?(?:my cycle|my periods?|my period history|my cycle history|my diary|मेरी डायरी|मेरा चक्र|मेरी माहवारी|मेरे पीरियड)(?: please)?$/.test(input)) return true;
+  if (/^(?:please )?(?:my cycle|my periods?|my period history|my cycle history|my diary|मेरी डायरी|मेरा चक्र|मेरी माहवारी|मेरे पीरियड|என் நாட்குறிப்பு|என் சுழற்சி)(?: please)?$/.test(input)) return true;
   const summary = /\b(?:summari[sz]e|summary|summari[sz]ation)\b/.test(input);
   const personal = /\bmy (?:cycle|period|diary|logs|history)\b/.test(input);
   if (summary && personal) return true;
@@ -57,8 +57,26 @@ function isDiaryRequest(input) {
   if (/\bmy (?:period|cycle) history\b/.test(input)) return true;
   if (/(?:मेरी डायरी|मेरा चक्र|मेरे चक्र|मेरी माहवारी|मेरे पीरियड)/.test(input) && /(?:सारांश|इतिहास)/.test(input)) return true;
   if (/^(?:(?:कृपया|मुझे) )?(?:मेरी डायरी|मेरा चक्र|मेरे चक्र|मेरी माहवारी|मेरे पीरियड) (?:दिखाओ|दिखाएँ|दिखाएं|बताओ|बताएँ|बताएं)$/.test(input)) return true;
+  if (/^(?:(?:தயவுசெய்து|தயவு செய்து) )?என் (?:நாட்குறிப்பின்|சுழற்சியின்) சுருக்க(?:ம்|த்தைக்)(?: (?:காட்டு|காட்டவும்|சொல்|சொல்லவும்))?$/.test(input)) return true;
   return /^(?:when is|when will|show me) my next period(?: start| come| date)?$/.test(input)
     || /^(?:मेरी अगली माहवारी|मेरे अगले पीरियड) (?:कब|कब आएगी|कब आएंगे|कब होंगे)$/.test(input);
+}
+
+function isEducationalPrior(input) {
+  const prior = normalize(input);
+  // Asking for a definition does not report that symptom. Personal concerns,
+  // including questions about a possible pregnancy, remain eligible context.
+  const personal = /\b(?:i|my|mine|me|we|our)\b/.test(prior)
+    || /(?:^|\s)(?:मैं|मुझे|मेरा|मेरी|मेरे|நான்|எனக்கு|என்|எனது|என்னை)(?=\s|$)/.test(prior);
+  if (personal) return false;
+  return /^what (?:is|are) (?!wrong\b|happening\b|causing\b)/.test(prior)
+    || /^what does .+ mean$/.test(prior)
+    || /^(?:define|definition of|explain)\b/.test(prior)
+    || /^how (?:to|do (?:people|you)|can (?:people|you)|should (?:people|you)) (?:use|wear|change|wash|clean|count|track|log|record|read)\b/.test(prior)
+    || /(?:क्या है|क्या होता है|क्या होती है|किसे कहते हैं|का मतलब|की परिभाषा)/.test(prior)
+    || /(?:कैसे (?:इस्तेमाल|उपयोग|साफ|धो|गिन|दर्ज|रिकॉर्ड)|(?:इस्तेमाल|उपयोग|गिनना|दर्ज करना|रिकॉर्ड) कैसे)/.test(prior)
+    || /(?:என்றால் என்ன|என்பது என்ன|என்ன பொருள்|பற்றி விளக்க)/.test(prior)
+    || /எப்படி(?:க்|ப்)? (?:பயன்படுத்த|அணிய|மாற்ற|சுத்தம்|எண்ண|பதிவுசெய்ய|பதிவு செய்ய)/.test(prior);
 }
 
 function continuingUrgentAnswer(input, previousQuestion, language, currentAnswer) {
@@ -68,18 +86,22 @@ function continuingUrgentAnswer(input, previousQuestion, language, currentAnswer
   const normalized = normalize(input);
   const continuation = /^(?:and|also|now|still|in addition)\b/.test(normalized)
     || /\b(?:also|now|still|too)\b/.test(normalized)
-    || /(?:^|\s)(?:और|भी|अब|साथ में|इसके अलावा|अभी भी)(?=\s|$)/.test(normalized);
+    || /(?:^|\s)(?:और|भी|अब|साथ में|इसके अलावा|अभी भी|மேலும்|இப்போது|இன்னும்|கூட)(?=\s|$)/.test(normalized);
   // A conjunction inside an educational question is not a symptom followup.
   // Hindi markers need token boundaries so, for example, कभी is not भी.
-  const statement = normalized.replace(/^(?:(?:and|also|now|still|in addition|और|भी|अब|साथ में|इसके अलावा|अभी भी)\s+)+/, '');
+  const statement = normalized.replace(/^(?:(?:and|also|now|still|in addition|और|भी|अब|साथ में|इसके अलावा|अभी भी|மேலும்|இப்போது|இன்னும்|கூட)\s+)+/, '');
   if (/^(?:what|why|how|when|where|who|which)\b/.test(statement)
     || /^(?:क्या|क्यों|कैसे|कब|कहाँ|कौन)(?=\s|$)/.test(statement)
+    || /^(?:எப்படி(?:க்|ப்)?|ஏன்|எப்போது|என்ன)(?=\s|$)/.test(statement)
     || /\b(?:want to know|explain|tell me|learn|understand)\b/.test(statement)) return null;
   const danger = /\b(?:bleed\w*|blood|spotting|pad|dizz\w*|lightheaded|light headed|faint\w*|severe|pain|pregnan\w*|unrelieved|not helped|no relief|not helping|not working)\b/.test(normalized)
-    || /(?:खून|रक्त|स्पॉटिंग|ब्लीडिंग|पैड|चक्कर|सिर घूम|बेहोश|दर्द|गर्भ|प्रेग्न|आराम नहीं)/.test(normalized);
+    || /(?:खून|रक्त|स्पॉटिंग|ब्लीडिंग|पैड|चक्कर|सिर घूम|बेहोश|दर्द|गर्भ|प्रेग्न|आराम नहीं)/.test(normalized)
+    || /(?:இரத்தப்போக்கு|இரத்தம்|ரத்தப்போக்கு|ரத்தம்|கடுமையான வலி|கீழ் வயிற்று வலி|கர்ப்பம்|கர்ப்பமாக|தலைச்சுற்றல்|தலை சுற்றுகிறது|மயக்கம்|மயங்கி|மயக்கமாக|நிவாரணம் இல்லை|குறையவில்லை|உதவவில்லை)/.test(normalized);
   if (!continuation || !danger) return null;
+  const previous = bounded(previousQuestion);
+  if (isEducationalPrior(previous)) return null;
   // Keep the combined routing input within the same bound as one UI message.
-  const prior = bounded(previousQuestion).slice(0, Math.max(0, CHAT_MESSAGE_LIMIT - input.length - 1));
+  const prior = previous.slice(0, Math.max(0, CHAT_MESSAGE_LIMIT - input.length - 1));
   if (!prior.trim()) return null;
   const answer = answerQuestion(`${prior}\n${input}`, language);
   return answer.safety === 'urgent' ? answer : null;
@@ -102,7 +124,7 @@ function diarySummary(state, language, t) {
   const profile = object(input.profile) ? input.profile : {};
   const pregnancyEnabled = profile.pregnancyEnabled === true;
   const analysis = analyzeCycles(logs, { today, pregnancyEnabled, fertilityEnabled: false, trackedSymptoms: [] });
-  const number = value => new Intl.NumberFormat(language === 'hi' ? 'hi-IN' : 'en-IN', { maximumFractionDigits: 1 }).format(value);
+  const number = value => new Intl.NumberFormat(language === 'hi' ? 'hi-IN' : language === 'ta' ? 'ta-IN' : 'en-IN', { maximumFractionDigits: 1 }).format(value);
   const sentences = [];
   if (input.demo === true) sentences.push(t('ask.diaryDemo'));
   sentences.push(t('ask.diarySummaryIntro'));
@@ -127,7 +149,7 @@ function diarySummary(state, language, t) {
 
 /** Deterministic, offline conversation around the established sourced FAQ. */
 export function answerOfflineChat(question, { language = 'en', state = null, useDiary = false, previousQuestion = '' } = {}) {
-  const lang = language === 'hi' ? 'hi' : 'en';
+  const lang = ['en', 'hi', 'ta'].includes(language) ? language : 'en';
   const t = translator(lang);
   const input = bounded(question).trim();
   const normalized = normalize(input);
@@ -139,7 +161,7 @@ export function answerOfflineChat(question, { language = 'en', state = null, use
   // Specific health questions keep their sourced answer even if a diary phrase
   // appears alongside them (for example, "my cycle is late").
   const diaryOnlyMatch = answer.id === 'unknown' || ['cycleStart', 'prediction', 'privacy'].includes(answer.id);
-  if (diaryOnlyMatch && isDiaryRequest(normalized)) {
+  if (diaryOnlyMatch && (normalized === normalize(t('ask.diaryPrompt')) || isDiaryRequest(normalized))) {
     return useDiary === true
       ? diarySummary(state, lang, t)
       : nonmedical('diaryOptIn', 'ask.diaryOptIn', t, { related: ['cycleStart', 'prediction', 'privacy'] });
