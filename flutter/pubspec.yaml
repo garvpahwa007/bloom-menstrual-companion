@@ -1,0 +1,36 @@
+name: bloom_companion
+description: "Bloom menstrual health companion — a private, local-first Flutter app."
+publish_to: 'none'
+version: 1.0.0+1
+environment:
+  sdk: ^3.13.0
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+  shared_preferences: ^2.5.3
+  http: ^1.4.0
+  intl: ^0.20.3
+  cryptography: ^2.7.0
+  flutter_secure_storage: ^9.2.4
+  file_picker: ^8.1.7
+  share_plus: ^10.1.4
+  pdf: ^3.11.3
+  printing: ^5.14.2
+  flutter_local_notifications: ^19.2.1
+  flutter_tts: ^4.2.3
+  url_launcher: ^6.3.2
+dependency_overrides:
+  # pdf 3.12 pins archive below 4.1; image 4.11 uses an unavailable API.
+  image: 4.10.0
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/images/bloom-mark.png
+    - assets/content/react_content.json
