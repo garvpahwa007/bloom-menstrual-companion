@@ -22,6 +22,6 @@ export const SAFETY_COPY = {
     en: 'You logged very low mood on several days. You deserve support; you do not need to wait for a pattern. Talk to someone you trust or a healthcare professional. Tele MANAS: 14416. If you may hurt yourself, get immediate help through 112.',
     hi: 'आपने कई दिनों पर मन बहुत उदास लिखा है। आपको सहारा मिलना चाहिए; किसी पैटर्न का इंतज़ार ज़रूरी नहीं है। भरोसेमंद व्यक्ति या स्वास्थ्यकर्मी से बात करें। Tele MANAS: 14416। खुद को चोट पहुँचाने का डर हो तो तुरंत 112 से मदद लें।',
   },
-  disclaimer: { en: 'General information, not medical advice.', hi: 'यह सामान्य जानकारी है, व्यक्तिगत चिकित्सा सलाह नहीं।' },
-  fertility: { en: "This is an estimate. It can't be used to prevent pregnancy.", hi: 'यह एक अनुमान है। इसका उपयोग गर्भ रोकने के लिए नहीं किया जा सकता।' },
+  disclaimer: { en: 'General information, not medical advice.', hi: 'यह सामान्य जानकारी है, व्यक्तिगत चिकित्सा सलाह नहीं।', ta: 'இது பொதுவான தகவல்; மருத்துவ ஆலோசனை அல்ல.' },
+  fertility: { en: "This is an estimate. It can't be used to prevent pregnancy.", hi: 'यह एक अनुमान है। इसका उपयोग गर्भ रोकने के लिए नहीं किया जा सकता।', ta: 'இது ஒரு மதிப்பீடு மட்டுமே. கர்ப்பத்தைத் தடுக்க இதைப் பயன்படுத்த முடியாது.' },
 };

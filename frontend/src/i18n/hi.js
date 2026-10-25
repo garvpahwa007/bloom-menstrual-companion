@@ -118,6 +118,7 @@ export default {
   "common.local": "इस डिवाइस पर सहेजा गया",
   "common.language": "भाषा",
   "common.english": "English",
+  "common.tamil": "தமிழ்",
   "common.hindi": "हिंदी",
   "common.back": "वापस",
   "common.save": "सहेजें",

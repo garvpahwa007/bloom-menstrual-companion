@@ -118,6 +118,7 @@ export default {
   "common.local": "Saved on this device",
   "common.language": "Language",
   "common.english": "English",
+  "common.tamil": "தமிழ்",
   "common.hindi": "हिंदी",
   "common.back": "Back",
   "common.save": "Save",

@@ -7,7 +7,7 @@ const encoder = new TextEncoder();
 const cleanText = value => String(value ?? '').replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, '').trim();
 const list = value => Array.isArray(value) ? value : [];
 const count = value => Number.isFinite(value) ? Math.max(0, value) : 0;
-const number = (value, lang) => new Intl.NumberFormat(lang === 'hi' ? 'hi-IN' : 'en-IN').format(value);
+const number = (value, lang) => new Intl.NumberFormat(lang === 'hi' ? 'hi-IN' : lang === 'ta' ? 'ta-IN' : 'en-IN').format(value);
 const validDate = date => { try { return typeof date === 'string' && daysBetween(date, date) === 0; } catch { return false; } };
 
 function span(from, to, lang) {
@@ -113,7 +113,7 @@ function fontStyle(kind, body) {
 
 function wrapText(context, text, width, lang) {
   const lines = []; const words = cleanText(text).split(/\s+/); let line = '';
-  const segmenter = typeof Intl.Segmenter === 'function' ? new Intl.Segmenter(lang === 'hi' ? 'hi' : 'en', { granularity: 'grapheme' }) : null;
+  const segmenter = typeof Intl.Segmenter === 'function' ? new Intl.Segmenter(lang === 'hi' ? 'hi' : lang === 'ta' ? 'ta' : 'en', { granularity: 'grapheme' }) : null;
   for (const word of words) {
     const candidate = line ? `${line} ${word}` : word;
     if (context.measureText(candidate).width <= width) { line = candidate; continue; }
@@ -166,7 +166,7 @@ export function imageToSinglePagePDF(jpeg, width, height, lang = 'en') {
   const ascii = text => append(encoder.encode(text));
   ascii('%PDF-1.4\n'); append(new Uint8Array([0x25, 0xe2, 0xe3, 0xcf, 0xd3, 0x0a]));
   const object = (id, text) => { offsets[id] = size; ascii(`${id} 0 obj\n${text}\nendobj\n`); };
-  object(1, `<< /Type /Catalog /Pages 2 0 R /Lang (${lang === 'hi' ? 'hi-IN' : 'en-IN'}) >>`);
+  object(1, `<< /Type /Catalog /Pages 2 0 R /Lang (${lang === 'hi' ? 'hi-IN' : lang === 'ta' ? 'ta-IN' : 'en-IN'}) >>`);
   object(2, '<< /Type /Pages /Kids [3 0 R] /Count 1 >>');
   object(3, `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${PDF_A4.width} ${PDF_A4.height}] /Resources << /XObject << /Im0 4 0 R >> >> /Contents 5 0 R >>`);
   offsets[4] = size;
