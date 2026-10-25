@@ -1,0 +1,30 @@
+{
+  "name": "bloom-api",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node --watch src/server.js --api-only",
+    "start": "node src/server.js",
+    "db:dev": "node scripts/mongo-local.mjs",
+    "test": "node --test --test-concurrency=1 tests/*.test.js",
+    "test:postman": "node scripts/run-postman.mjs"
+  },
+  "engines": {
+    "node": ">=20.19"
+  },
+  "dependencies": {
+    "express": "^5.1.0",
+    "mongoose": "^8.19.0",
+    "joi": "^17.13.3",
+    "cors": "^2.8.5",
+    "cookie-parser": "^1.4.7",
+    "helmet": "^8.1.0",
+    "express-rate-limit": "^8.1.0",
+    "dotenv": "^17.2.3"
+  },
+  "devDependencies": {
+    "mongodb-memory-server-core": "^10.2.3",
+    "postman-cli": "^1.31.0"
+  }
+}

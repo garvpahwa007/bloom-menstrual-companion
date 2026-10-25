@@ -1,21 +1,42 @@
-Bloom latest working source — 24 October 2026
+Bloom — Express backend and optional encrypted cloud backup, 25 October 2026
 
-Requires Node.js >=20.19 and npm. Verification used Node.js v22.13.0 and npm 10.9.2.
+Use Node.js >=20.19 and npm. Run all commands from this project root.
 
-From this folder:
+Install:
   npm ci
-  npm run dev
-Open http://localhost:5173
 
-Latest automated checks:
-  npm test       197 passed, 0 failed, 0 skipped
-  npm run build  passed (Vite production build)
-  git diff --check passed
+Three development terminals:
+  npm run db:dev          MongoDB at 127.0.0.1:27018 (persistent development data)
+  npm run dev:backend     Express API at localhost:3000/api/v1
+  npm run dev:frontend    React/Vite at localhost:5173, proxies /api to Express
 
-To preview the production build, run `npm start`. Bloom now builds a production-only installable app-shell PWA and has offline shell fallback; the worker caches static app files only, never diary data or backups. External source links and reminders are not promised offline.
+Open Privacy & Data -> Open Cloud Backup. Tracking and education still work without an account.
+Cloud Backup uses an optional alias/password account. Uploads happen only when selected.
+The browser encrypts the complete diary before upload. Keep a separate backup passphrase;
+the server cannot recover it. Download, decrypt, then confirm before restoring local data.
+Delete local data, cloud backup, and cloud account using their separate controls.
 
-The privacy screen retains plaintext-compatible JSON/CSV and also offers a passphrase-encrypted backup. The backup passphrase is not recoverable if forgotten and is separate from the app’s four-digit PIN. The local-storage key `saheli.v1` remains unchanged intentionally, so existing saved diaries continue to work.
+Checks:
+  npm test
+  npm run test:postman
+  npm run build
 
-Primary public URL: https://bloom-period-companion.vercel.app/ (Vercel), configured by the user. The old https://saheli-menstrual-companion.vercel.app/ URL remains available as an alias. Build 2 commit `05bf602` is pushed and verified on both hosts; both use the primary Bloom canonical/Open Graph URL, and `/calendar` and `/ask` return HTTP 200. The private GitHub repository slug remains `garvpahwa007/saheli-menstrual-companion`. See `BUILD_2_AUDIT.md` for feature-by-feature status and Build 2 verification limits.
+Serve the built app + API with MongoDB running:
+  npm start
+  Open http://localhost:3000
 
-A qualified clinician and native-Hindi medical/plain-language reviewer still need to check the health content and translations. Physical-device installation, screen-reader/VoiceOver/TalkBack, extensive focus/keyboard testing and actual production offline behavior remain to be checked. See `VALIDATION.md`, `MEDICAL_SOURCE_REVIEW.md`, `CLINICIAN_REVIEW_NOTE_PCOD.md` and `DEVICE_CHECKLIST.md`.
+Frontend-only development: npm run dev
+Frontend-only production preview: npm run preview
+
+The original brief required no accounts/server. Optional cloud backup is the user-requested
+exception. Core local tracking, free access, Hindi/English and health safety remain intact.
+The service worker caches only static app files, never account APIs or diary backups.
+The legacy saheli.v1 local-storage key and local PIN encryption remain compatible.
+
+See docs/BACKEND_SETUP.md, docs/API.md, docs/API_TESTING.md, docs/BACKEND_STATUS.md.
+The local branch remains refactor/bloodlink-structure. Review this branch before merging. Backend deployment is separate.
+Existing static Vercel/Netlify settings deploy local tracking only; full cloud hosting needs
+the Node server, HTTPS, and an authenticated private MongoDB configured by its operator.
+
+Health content still needs independent clinical and native-Hindi review before public health
+use. Earlier device/accessibility review limits remain in docs/VALIDATION.md.
